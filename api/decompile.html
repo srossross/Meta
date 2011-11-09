@@ -1,0 +1,166 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>meta.decompile - decompile code objects into ast nodes &mdash; Meta v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Meta v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="Meta API" href="index.html" />
+    <link rel="prev" title="meta.asttools - operate on python ast nodes" href="asttools.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="asttools.html" title="meta.asttools - operate on python ast nodes"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Meta v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Meta API</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-meta.decompile">
+<span id="meta-decompile-decompile-code-objects-into-ast-nodes"></span><h1><a class="reference internal" href="#module-meta.decompile" title="meta.decompile"><tt class="xref py py-mod docutils literal"><span class="pre">meta.decompile</span></tt></a> - decompile code objects into ast  nodes<a class="headerlink" href="#module-meta.decompile" title="Permalink to this headline">¶</a></h1>
+<p>Decompiler module.</p>
+<p>This module can decompile arbitrary code objects into a python ast.</p>
+<dl class="function">
+<dt id="meta.decompile.decompile_func">
+<tt class="descclassname">meta.decompile.</tt><tt class="descname">decompile_func</tt><big>(</big><em>func</em><big>)</big><a class="reference internal" href="../_modules/meta/decompile.html#decompile_func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meta.decompile.decompile_func" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decompile a function into ast.FunctionDef node.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func</strong> &#8211; python function (can not be a built-in)</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">ast.FunctionDef instance.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="meta.decompile.compile_func">
+<tt class="descclassname">meta.decompile.</tt><tt class="descname">compile_func</tt><big>(</big><em>ast_node</em>, <em>filename</em>, <em>globals</em>, <em>**defaults</em><big>)</big><a class="reference internal" href="../_modules/meta/decompile.html#compile_func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meta.decompile.compile_func" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compile a function from an ast.FunctionDef instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ast_node</strong> &#8211; ast.FunctionDef instance</li>
+<li><strong>filename</strong> &#8211; path where function source can be found.</li>
+<li><strong>globals</strong> &#8211; will be used as func_globals</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A python function object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="meta.decompile.decompile_pyc">
+<tt class="descclassname">meta.decompile.</tt><tt class="descname">decompile_pyc</tt><big>(</big><em>bin_pyc</em>, <em>output=&lt;open file '&lt;stdout&gt;'</em>, <em>mode 'w' at 0x23f078&gt;</em><big>)</big><a class="reference internal" href="../_modules/meta/decompile.html#decompile_pyc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meta.decompile.decompile_pyc" title="Permalink to this definition">¶</a></dt>
+<dd><p>decompile apython pyc or pyo binary file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>bin_pyc</strong> &#8211; input file objects</li>
+<li><strong>output</strong> &#8211; output file objects</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="asttools.html"
+                        title="previous chapter"><tt class="docutils literal docutils literal"><span class="pre">meta.asttools</span></tt> - operate on python ast nodes</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/decompile.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="asttools.html" title="meta.asttools - operate on python ast nodes"
+             >previous</a> |</li>
+        <li><a href="../index.html">Meta v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Meta API</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Sean Ross-Ross.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

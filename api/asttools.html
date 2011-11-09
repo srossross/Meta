@@ -1,0 +1,318 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>meta.asttools - operate on python ast nodes &mdash; Meta v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Meta v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="Meta API" href="index.html" />
+    <link rel="next" title="meta.decompile - decompile code objects into ast nodes" href="decompile.html" />
+    <link rel="prev" title="Meta API" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="decompile.html" title="meta.decompile - decompile code objects into ast nodes"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Meta API"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Meta v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Meta API</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-meta.asttools">
+<span id="meta-asttools-operate-on-python-ast-nodes"></span><h1><a class="reference internal" href="#module-meta.asttools" title="meta.asttools"><tt class="xref py py-mod docutils literal"><span class="pre">meta.asttools</span></tt></a> - operate on python ast nodes<a class="headerlink" href="#module-meta.asttools" title="Permalink to this headline">¶</a></h1>
+<p>Module to augment and analize python ast nodes.</p>
+<p>This module uses the python <cite>ast</cite> moduel exclusivly not the depricated <cite>compiler.ast</cite>.</p>
+<dl class="class">
+<dt id="meta.asttools.Undedined">
+<em class="property">class </em><tt class="descclassname">meta.asttools.</tt><tt class="descname">Undedined</tt><a class="reference internal" href="../_modules/meta/asttools.html#Undedined"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meta.asttools.Undedined" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meta.asttools.cmp_ast">
+<tt class="descclassname">meta.asttools.</tt><tt class="descname">cmp_ast</tt><big>(</big><em>node1</em>, <em>node2</em><big>)</big><a class="reference internal" href="../_modules/meta/asttools.html#cmp_ast"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meta.asttools.cmp_ast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare if two nodes are equal.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meta.asttools.print_ast">
+<tt class="descclassname">meta.asttools.</tt><tt class="descname">print_ast</tt><big>(</big><em>ast</em>, <em>indent=' '</em>, <em>initlevel=0</em>, <em>newline='\n'</em>, <em>file=&lt;open file '&lt;stdout&gt;'</em>, <em>mode 'w' at 0x23f078&gt;</em><big>)</big><a class="headerlink" href="#meta.asttools.print_ast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretty print an ast node.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ast</strong> &#8211; the ast to print.</li>
+<li><strong>indent</strong> &#8211; how far to indent a newline.</li>
+<li><strong>initlevel</strong> &#8211; starting indent level</li>
+<li><strong>newline</strong> &#8211; The newline character.</li>
+<li><strong>file</strong> &#8211; file object to print to</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>To print a short ast you may want to use:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">node</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+<span class="n">print_ast</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="meta.asttools.str_ast">
+<tt class="descclassname">meta.asttools.</tt><tt class="descname">str_ast</tt><big>(</big><em>ast</em>, <em>indent=' '</em>, <em>newline='\n'</em><big>)</big><a class="headerlink" href="#meta.asttools.str_ast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a string representing the ast.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ast</strong> &#8211; the ast to print.</li>
+<li><strong>indent</strong> &#8211; how far to indent a newline.</li>
+<li><strong>newline</strong> &#8211; The newline character.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="meta.asttools.python_source">
+<tt class="descclassname">meta.asttools.</tt><tt class="descname">python_source</tt><big>(</big><em>ast</em>, <em>file=&lt;open file '&lt;stdout&gt;'</em>, <em>mode 'w' at 0x23f078&gt;</em><big>)</big><a class="headerlink" href="#meta.asttools.python_source" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate executable python source code from an ast node.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ast</strong> &#8211; ast node</li>
+<li><strong>file</strong> &#8211; file to write output to.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="meta.asttools.dump_python_source">
+<tt class="descclassname">meta.asttools.</tt><tt class="descname">dump_python_source</tt><big>(</big><em>ast</em><big>)</big><a class="headerlink" href="#meta.asttools.dump_python_source" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a string containing executable python source code from an ast node.</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ast</strong> &#8211; ast node</li>
+<li><strong>file</strong> &#8211; file to write output to.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="meta.asttools.lhs">
+<tt class="descclassname">meta.asttools.</tt><tt class="descname">lhs</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#meta.asttools.lhs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a set of symbols in <cite>node</cite> that are assigned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> &#8211; ast node</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">set of strings.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="meta.asttools.rhs">
+<tt class="descclassname">meta.asttools.</tt><tt class="descname">rhs</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#meta.asttools.rhs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a set of symbols in <cite>node</cite> that are used.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> &#8211; ast node</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">set of strings.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="meta.asttools.conditional_lhs">
+<tt class="descclassname">meta.asttools.</tt><tt class="descname">conditional_lhs</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#meta.asttools.conditional_lhs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Group outputs into contitional and stable
+:param node: ast node</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">tuple of (contitional, stable)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="meta.asttools.conditional_symbols">
+<tt class="descclassname">meta.asttools.</tt><tt class="descname">conditional_symbols</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#meta.asttools.conditional_symbols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Group lhs and rhs into contitional, stable and undefined
+:param node: ast node</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">tuple of (contitional_lhs, stable_lhs),(contitional_rhs, stable_rhs), undefined</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="meta.asttools.get_symbols">
+<tt class="descclassname">meta.asttools.</tt><tt class="descname">get_symbols</tt><big>(</big><em>node</em>, <em>ctx_types=(&lt;class '_ast.Load'&gt;</em>, <em>&lt;class '_ast.Store'&gt;)</em><big>)</big><a class="headerlink" href="#meta.asttools.get_symbols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all symbols defined in an ast node.</p>
+<p>if ctx_types is given, then restrict the symbols to ones with that context.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>node</strong> &#8211; ast node</li>
+<li><strong>ctx_types</strong> &#8211; type or tuple of types that may be found assigned to the <cite>ctx</cite> attribute of 
+an ast Name node.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="meta.asttools.make_graph">
+<tt class="descclassname">meta.asttools.</tt><tt class="descname">make_graph</tt><big>(</big><em>node</em>, <em>call_deps=False</em><big>)</big><a class="headerlink" href="#meta.asttools.make_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dependency graph from an ast node.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>node</strong> &#8211; ast node.</li>
+<li><strong>call_deps</strong> &#8211; if true, then the graph will create a cyclic dependance for all
+function calls. (i.e for <cite>a.b(c)</cite> a depends on b and b depends on a)</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a tuple of (graph, undefined)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Meta API</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="decompile.html"
+                        title="next chapter"><tt class="docutils literal"><span class="pre">meta.decompile</span></tt> - decompile code objects into ast  nodes</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/asttools.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="decompile.html" title="meta.decompile - decompile code objects into ast nodes"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Meta API"
+             >previous</a> |</li>
+        <li><a href="../index.html">Meta v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Meta API</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Sean Ross-Ross.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

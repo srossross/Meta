@@ -1,0 +1,146 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>meta.asttools &mdash; Meta v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Meta v0.1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Meta v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for meta.asttools</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Module to augment and analize python ast nodes.</span>
+
+<span class="sd">This module uses the python `ast` moduel exclusivly not the depricated `compiler.ast`.  </span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">_ast</span>
+<span class="kn">import</span> <span class="nn">ast</span>
+
+<span class="kn">from</span> <span class="nn">meta.asttools.visitors</span> <span class="kn">import</span> <span class="n">dont_visit</span><span class="p">,</span> <span class="n">visit_children</span><span class="p">,</span> <span class="n">Visitor</span>
+
+
+<div class="viewcode-block" id="Undedined"><a class="viewcode-back" href="../../api/asttools.html#meta.asttools.Undedined">[docs]</a><span class="k">class</span> <span class="nc">Undedined</span><span class="p">:</span> <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="cmp_ast"><a class="viewcode-back" href="../../api/asttools.html#meta.asttools.cmp_ast">[docs]</a><span class="k">def</span> <span class="nf">cmp_ast</span><span class="p">(</span><span class="n">node1</span><span class="p">,</span> <span class="n">node2</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Compare if two nodes are equal.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">node1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">type</span><span class="p">(</span><span class="n">node2</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node1</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">node1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">node2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">for</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">node1</span><span class="p">,</span> <span class="n">node2</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">cmp_ast</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node1</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">AST</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">node1</span><span class="o">.</span><span class="n">_fields</span><span class="p">:</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">node1</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">Undedined</span><span class="p">)</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">node2</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">Undedined</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">cmp_ast</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">node1</span> <span class="o">==</span> <span class="n">node2</span>
+
+    <span class="k">return</span> <span class="bp">True</span>
+
+
+
+
+<span class="c">#===============================================================================</span>
+<span class="c"># </span>
+<span class="c">#===============================================================================</span>
+</div>
+<span class="kn">from</span> <span class="nn">meta.asttools.visitors.print_visitor</span> <span class="kn">import</span> <span class="n">print_ast</span><span class="p">,</span> <span class="n">dump_ast</span> <span class="k">as</span> <span class="n">str_ast</span>
+<span class="kn">from</span> <span class="nn">meta.asttools.visitors.pysourcegen</span> <span class="kn">import</span> <span class="n">python_source</span><span class="p">,</span> <span class="n">dump_python_source</span>
+<span class="kn">from</span> <span class="nn">meta.asttools.visitors.cond_symbol_visitor</span> <span class="kn">import</span> <span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span>
+<span class="kn">from</span> <span class="nn">meta.asttools.visitors.cond_symbol_visitor</span> <span class="kn">import</span> <span class="n">conditional_lhs</span><span class="p">,</span> <span class="n">conditional_symbols</span>
+<span class="kn">from</span> <span class="nn">meta.asttools.visitors.symbol_visitor</span> <span class="kn">import</span> <span class="n">get_symbols</span>
+<span class="kn">from</span> <span class="nn">meta.asttools.visitors.graph_visitor</span> <span class="kn">import</span> <span class="n">make_graph</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Meta v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Sean Ross-Ross.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>
