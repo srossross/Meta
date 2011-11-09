@@ -16,6 +16,7 @@ import marshal
 import ast
 from py_compile import MAGIC
 
+from meta.decompile import extract
 from meta.decompile.instructions import make_module
 from meta.asttools import print_ast, python_source
 from meta.decompile.disassemble import print_code
@@ -25,23 +26,16 @@ import os
 py3 = sys.version_info.major >= 3
 
 def depyc(args):
-
-    bin = args.input.read()
-    magic = bin[:4]
     
-    if magic != MAGIC:
-        raise Exception("Python version mismatch (%r != %r) " % (magic, MAGIC))
+    binary = args.input.read()
+    modtime, code = extract(binary)
     
-    modtime = time.asctime(time.localtime(struct.unpack('i', bin[4:8])[0]))
-
     print("Decompiling module %r compiled on %s" % (args.input.name, modtime,), file=sys.stderr)
-    
-    code = marshal.loads(bin[8:])
     
     if args.output_type == 'pyc':
         if py3 and args.output is sys.stdout:
             args.output = sys.stdout.buffer
-        args.output.write(bin)
+        args.output.write(binary)
         return
             
     if args.output_type == 'opcode':

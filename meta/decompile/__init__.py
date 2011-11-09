@@ -62,6 +62,24 @@ def compile_func(ast_node, filename, globals, **defaults):
 
     return function
 
+from imp import get_magic
+
+def extract(binary):
+    
+    if len(binary) <= 8:
+        raise Exception("Binary pyc must be greater than 8 bytes got" % len(binary))
+    
+    magic = binary[:4]
+    MAGIC = get_magic()
+    
+    if magic != MAGIC:
+        raise Exception("Python version mismatch (%r != %r) Is this a pyc file?" % (magic, MAGIC))
+    
+    modtime = time.asctime(time.localtime(struct.unpack('i', binary[4:8])[0]))
+
+    code = marshal.loads(binary[8:])
+    
+    return modtime, code
 
 def decompile_pyc(bin_pyc, output=sys.stdout):
     '''

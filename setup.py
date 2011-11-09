@@ -13,7 +13,7 @@ setup(
     author_email='srossross@enthought.com',
     maintainer='Sean Ross-Ross',
     maintainer_email='enthought-dev@enthought.com',
-    url='https://srossross.github.com/Meta',
+    url='http://srossross.github.com/Meta',
     download_url=('https://github.com/srossross/Meta/downloads'),
     
     classifiers=[c.strip() for c in """\
