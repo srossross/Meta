@@ -2,6 +2,7 @@ import unittest
 import ast
 import inspect
 from meta.asttools import Visitor, cmp_ast, str_ast
+from meta.asttools.visitors.graph_visitor import GraphGen
 
 class NodeRecorder(Visitor):
     def __init__(self):
@@ -43,6 +44,15 @@ def assert_ast_eq(testcase, orig_ast, expected_ast):
         str2 = str_ast(expected_ast, indent=' ', newline='\n')
         msg = 'AST Trees are not equal\n## left ########### \n%s\n## right ########### \n%s' % (str1, str2)
         testcase.fail(msg)
+
+
+try: 
+    import networkx
+    have_networkx = True
+except:
+    have_networkx = False
+    
+skip_networkx = unittest.skipIf(not have_networkx, "Require networkx for these tests")
 
 
 if __name__ == "__main__":

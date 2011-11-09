@@ -7,10 +7,12 @@ from __future__ import print_function
 import unittest
 import ast
 from meta.asttools.visitors.graph_visitor import GraphGen
-from meta.asttools.tests import AllTypesTested
+from meta.asttools.visitors.graph_visitor import DiGraph
+from meta.asttools.tests import AllTypesTested, skip_networkx
 
 tested = AllTypesTested()
 
+ 
 def binop_method(op):
     def test_binop(self):
         source = 'c = a %s b' % (op,)
@@ -25,6 +27,7 @@ def unarynop_method(op):
                            { 'b'}, {'c'})
     return test_unaryop
 
+@skip_networkx
 class Test(unittest.TestCase):
 
     def assertDepends(self, source, edges, undefined=None, modified=None):

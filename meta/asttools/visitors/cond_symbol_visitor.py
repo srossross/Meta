@@ -8,6 +8,7 @@ from __future__ import print_function
 from meta.asttools.visitors import Visitor, visit_children
 from meta.asttools.visitors.symbol_visitor import get_symbols
 import ast
+from meta.utils import py2op
 
 class ConditionalSymbolVisitor(Visitor):
 
@@ -211,7 +212,8 @@ class ConditionalSymbolVisitor(Visitor):
 
         self.update_cond_lhs(outputs.symmetric_difference(orelse_outputs))
         self.update_cond_rhs(inputs.symmetric_difference(orelse_inputs))
-
+    
+    @py2op
     def visitExec(self, node):
 
         self.update_stable_rhs(get_symbols(node.body, ast.Load))
@@ -228,7 +230,8 @@ class ConditionalSymbolVisitor(Visitor):
 
         if node.msg:
             self.update_stable_rhs(get_symbols(node.msg, ast.Load))
-
+            
+    @py2op
     def visitRaise(self, node):
 
         if node.type:
@@ -237,6 +240,14 @@ class ConditionalSymbolVisitor(Visitor):
             self.update_stable_rhs(get_symbols(node.inst, ast.Load))
         if node.tback:
             self.update_stable_rhs(get_symbols(node.tback, ast.Load))
+
+    @visitRaise.py3op
+    def visitRaise(self, node):
+
+        if node.exc:
+            self.update_stable_rhs(get_symbols(node.exc, ast.Load))
+        if node.cause:
+            self.update_stable_rhs(get_symbols(node.cause, ast.Load))
 
     def visitTryExcept(self, node):
 
@@ -270,12 +281,23 @@ class ConditionalSymbolVisitor(Visitor):
         self.update_cond_lhs(gen.lhs)
         self.update_cond_rhs(gen.rhs)
 
+    @py2op
     def visitExceptHandler(self, node):
         if node.type:
             self.update_stable_rhs(get_symbols(node.type, ast.Load))
 
         if node.name:
             self.update_stable_lhs(get_symbols(node.name, ast.Store))
+
+        self.visit_list(node.body)
+
+    @visitExceptHandler.py3op
+    def visitExceptHandler(self, node):
+        if node.type:
+            self.update_stable_rhs(get_symbols(node.type, ast.Load))
+
+        if node.name:
+            self.update_stable_lhs({node.name})
 
         self.visit_list(node.body)
 

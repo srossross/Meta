@@ -8,7 +8,8 @@ from __future__ import print_function
 import unittest
 import ast
 from meta.asttools.mutators.remove_trivial import remove_trivial
-from meta.asttools.tests import assert_ast_eq
+from meta.asttools.tests import assert_ast_eq, skip_networkx
+from meta.asttools.visitors.graph_visitor import GraphGen
 
 
 def simple_case(self, toremove, expected):
@@ -21,6 +22,7 @@ def simple_case(self, toremove, expected):
 
     assert_ast_eq(self, root, expected_root)
 
+@skip_networkx
 class Test(unittest.TestCase):
 
     def assertRemoved(self, toremove, expected):

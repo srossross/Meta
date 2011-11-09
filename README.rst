@@ -30,6 +30,7 @@ This shows the depyc script. The script compiles itself, and then the compiled s
     depyc $DEPYC_FILE --pyc > depycX.pyc
     python -m depycX depycX.pyc --python > depycX.py
     echo depycX.py
+
 Notes
 ======
 
@@ -38,4 +39,8 @@ Notes
 Bugs
 =====
  * The decompliler does not yet support complex list/set/dict - comprehensions 
- 
+
+Testing 
+======= 
+
+`python -m unittest discover meta`

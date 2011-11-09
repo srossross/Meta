@@ -10,9 +10,6 @@ from meta.asttools.mutators.replace_mutator import replace_nodes
 import ast
 from meta.asttools.tests import assert_ast_eq
 
-
-replace_nodes
-
 class Test(unittest.TestCase):
 
     def test_replace_name(self):
