@@ -1,0 +1,173 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>meta.decompile &mdash; Meta v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
+    <link rel="top" title="Meta v0.1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Meta v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for meta.decompile</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Decompiler module.</span>
+
+<span class="sd">This module can decompile arbitrary code objects into a python ast. </span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">meta.decompile.instructions</span> <span class="kn">import</span> <span class="n">make_module</span><span class="p">,</span> <span class="n">make_function</span>
+
+<span class="kn">import</span> <span class="nn">_ast</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">marshal</span>
+
+
+
+<div class="viewcode-block" id="decompile_func"><a class="viewcode-back" href="../../api/decompile.html#meta.decompile.decompile_func">[docs]</a><span class="k">def</span> <span class="nf">decompile_func</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Decompile a function into ast.FunctionDef node.</span>
+<span class="sd">    </span>
+<span class="sd">    :param func: python function (can not be a built-in)</span>
+<span class="sd">    </span>
+<span class="sd">    :return: ast.FunctionDef instance.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">code</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s">&#39;func_code&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">code</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;can not get ast from </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">func</span><span class="p">,))</span>
+
+    <span class="c"># For python 3</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">func_defaults</span> <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="o">.</span><span class="n">major</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="k">else</span> <span class="n">func</span><span class="o">.</span><span class="n">__defaults__</span>
+    <span class="k">if</span> <span class="n">defaults</span><span class="p">:</span>
+        <span class="n">default_names</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">co_varnames</span><span class="p">[:</span><span class="n">code</span><span class="o">.</span><span class="n">co_argcount</span><span class="p">][</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">defaults</span><span class="p">):]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">default_names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="p">[</span><span class="n">_ast</span><span class="o">.</span><span class="n">Name</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">_default&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">,</span> <span class="n">ctx</span><span class="o">=</span><span class="n">_ast</span><span class="o">.</span><span class="n">Load</span><span class="p">()</span> <span class="p">,</span> <span class="n">lineno</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">col_offset</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">default_names</span><span class="p">]</span>
+    <span class="n">ast_node</span> <span class="o">=</span> <span class="n">make_function</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span> <span class="n">lineno</span><span class="o">=</span><span class="n">code</span><span class="o">.</span><span class="n">co_firstlineno</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ast_node</span>
+</div>
+<div class="viewcode-block" id="compile_func"><a class="viewcode-back" href="../../api/decompile.html#meta.decompile.compile_func">[docs]</a><span class="k">def</span> <span class="nf">compile_func</span><span class="p">(</span><span class="n">ast_node</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="nb">globals</span><span class="p">,</span> <span class="o">**</span><span class="n">defaults</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Compile a function from an ast.FunctionDef instance.</span>
+<span class="sd">    </span>
+<span class="sd">    :param ast_node: ast.FunctionDef instance</span>
+<span class="sd">    :param filename: path where function source can be found. </span>
+<span class="sd">    :param globals: will be used as func_globals</span>
+<span class="sd">    </span>
+<span class="sd">    :return: A python function object</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">funcion_name</span> <span class="o">=</span> <span class="n">ast_node</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">module</span> <span class="o">=</span> <span class="n">_ast</span><span class="o">.</span><span class="n">Module</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="p">[</span><span class="n">ast_node</span><span class="p">])</span>
+
+    <span class="n">ctx</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">_default&#39;</span> <span class="o">%</span> <span class="n">key</span> <span class="p">:</span> <span class="n">arg</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">defaults</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="n">code</span> <span class="o">=</span> <span class="nb">compile</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="s">&#39;exec&#39;</span><span class="p">)</span>
+
+    <span class="nb">eval</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="nb">globals</span><span class="p">,</span> <span class="n">ctx</span><span class="p">)</span>
+
+    <span class="n">function</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">[</span><span class="n">funcion_name</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">function</span>
+
+</div>
+<div class="viewcode-block" id="decompile_pyc"><a class="viewcode-back" href="../../api/decompile.html#meta.decompile.decompile_pyc">[docs]</a><span class="k">def</span> <span class="nf">decompile_pyc</span><span class="p">(</span><span class="n">bin_pyc</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    decompile apython pyc or pyo binary file.</span>
+<span class="sd">    </span>
+<span class="sd">    :param bin_pyc: input file objects</span>
+<span class="sd">    :param output: output file objects</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="kn">from</span> <span class="nn">meta.asttools</span> <span class="kn">import</span> <span class="n">python_source</span>
+    
+    <span class="nb">bin</span> <span class="o">=</span> <span class="n">bin_pyc</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    
+    <span class="n">code</span> <span class="o">=</span> <span class="n">marshal</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="nb">bin</span><span class="p">[</span><span class="mi">8</span><span class="p">:])</span>
+    
+    <span class="n">mod_ast</span> <span class="o">=</span> <span class="n">make_module</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+    
+    <span class="n">python_source</span><span class="p">(</span><span class="n">mod_ast</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">output</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Meta v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Sean Ross-Ross.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>
