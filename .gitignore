@@ -5,3 +5,5 @@ build
 dist
 .project
 .pydevproject
+_build
+.settings/

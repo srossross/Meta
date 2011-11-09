@@ -5,7 +5,7 @@
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
-BUILDDIR      = _build
+BUILDDIR      = /Users/sean/indigo_workspace/Meta_Doc
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
