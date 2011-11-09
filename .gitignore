@@ -1,0 +1,10 @@
+*.pyc
+.DS_Store
+*.egg-info
+build
+dist
+.project
+.pydevproject
+_build
+.settings/
+__pycache__
