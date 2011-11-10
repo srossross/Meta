@@ -10,17 +10,13 @@ from __future__ import print_function
 from argparse import ArgumentParser, FileType
 
 import sys
-import time
-import struct
-import marshal
 import ast
-from py_compile import MAGIC
 
-from meta.decompile import extract
-from meta.decompile.instructions import make_module
 from meta.asttools import print_ast, python_source
-from meta.decompile.disassemble import print_code
-from meta.decompile.recompile import create_pyc
+from meta.decompiler import extract
+from meta.decompiler.instructions import make_module
+from meta.decompiler.disassemble import print_code
+from meta.decompiler.recompile import create_pyc
 import os
 
 py3 = sys.version_info.major >= 3
@@ -60,7 +56,7 @@ def src_tool(args):
     
     source = args.input.read()
     mod_ast = ast.parse(source, args.input.name)
-    code = compile(source, args.input.name, mode='exec')
+    code = compile(source, args.input.name, mode='exec', dont_inherit=True)
     
     if args.output_type == 'opcode':
         print_code(code)

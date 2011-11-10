@@ -6,7 +6,7 @@ Created on Jul 14, 2011
 from __future__ import print_function
 from opcode import *
 import _ast
-from meta.decompile.disassemble import Instruction
+from meta.decompiler.disassemble import Instruction
 from meta.asttools.visitors.print_visitor import print_ast
 from meta.utils import py3op, py2op, py3
 AND_JUMPS = ['JUMP_IF_FALSE_OR_POP', 'POP_JUMP_IF_FALSE']
@@ -167,7 +167,8 @@ class CtrlFlowInstructions(object):
                 ends.append(handler_body[-1].arg)
 
                 exc_body = self.decompile_block(handler_body[:-1]).stmnt()
-                
+                if not exc_body:
+                    exc_body.append(_ast.Pass(lineno=except_instrs[-2].lineno, col_offset=0))
                 #is this for python 3?
                 if py3 and exc_name is not None:
                     exc_name = exc_name.id
@@ -182,12 +183,15 @@ class CtrlFlowInstructions(object):
             pass
         else:
 
-            assert opname[except_instrs[0].op] == 'POP_TOP'
-            assert opname[except_instrs[1].op] == 'POP_TOP'
-            assert opname[except_instrs[2].op] == 'POP_TOP'
-            assert opname[except_instrs[-2].op] == 'JUMP_FORWARD'
+            assert except_instrs[0].opname == 'POP_TOP'
+            assert except_instrs[1].opname == 'POP_TOP'
+            assert except_instrs[2].opname == 'POP_TOP'
+            assert except_instrs[-2].opname in ['JUMP_FORWARD', 'JUMP_ABSOLUTE'], except_instrs[-2]
             ends.append(except_instrs[-2].arg)
             exc_body = self.decompile_block(except_instrs[3:-2]).stmnt()
+            if not exc_body:
+                exc_body.append(_ast.Pass(lineno=except_instrs[-2].lineno, col_offset=0))
+
             handlers.append(_ast.ExceptHandler(type=None, name=None, body=exc_body, lineno=except_instrs[0].lineno, col_offset=0))
 
             assert all(e == ends[0] for e in ends)
@@ -281,13 +285,13 @@ class CtrlFlowInstructions(object):
 
         try_block = self.make_block(to, inclusive=False)
 
-        assert opname[try_block[-1].op] == 'JUMP_FORWARD'
-        assert opname[try_block[-2].op] == 'POP_BLOCK'
+        assert try_block[-1].opname in ['JUMP_FORWARD', 'JUMP_ABSOLUTE'], try_block[-1] 
+        assert try_block[-2].opname == 'POP_BLOCK', try_block[-2]
 
         try_stmnts = self.decompile_block(try_block[:-2]).stmnt()
         body = try_stmnts
 
-        handlers_blocks = self.make_block(try_block[-1].arg, inclusive=False)
+        handlers_blocks = self.make_block(try_block[-1].arg, inclusive=False, raise_=False)
 
         end, handlers = self.split_handlers(handlers_blocks)
         
@@ -311,13 +315,13 @@ class CtrlFlowInstructions(object):
 
         try_block = self.make_block(to, inclusive=False)
 
-        assert opname[try_block[-1].op] == 'JUMP_FORWARD'
-        assert opname[try_block[-2].op] == 'POP_BLOCK'
+        assert try_block[-1].opname in ['JUMP_FORWARD', 'JUMP_ABSOLUTE']
+        assert try_block[-2].opname == 'POP_BLOCK'
 
         try_stmnts = self.decompile_block(try_block[:-2]).stmnt()
         body = try_stmnts
 
-        handlers_blocks = self.make_block(try_block[-1].arg, inclusive=False)
+        handlers_blocks = self.make_block(try_block[-1].arg, inclusive=False, raise_=False)
 
         end, handlers = self.split_handlers(handlers_blocks)
 
@@ -807,9 +811,9 @@ class CtrlFlowInstructions(object):
 
         with_ = self.decompile_block(with_block, stack_items=['WITH_BLOCK']).stmnt()
 
-        if isinstance(with_[0], _ast.Assign) and with_[0].expr == 'WITH_BLOCK':
+        if isinstance(with_[0], _ast.Assign) and with_[0].value == 'WITH_BLOCK':
             assign = with_.pop(0)
-            as_ = assign.nodes[0]
+            as_ = assign.targets[0]
 
         body = with_
 
@@ -819,3 +823,8 @@ class CtrlFlowInstructions(object):
                           lineno=instr.lineno, col_offset=0)
 
         self.ast_stack.append(with_)
+        
+    def CONTINUE_LOOP(self, instr):
+        cont = _ast.Continue(lineno=instr.lineno, col_offset=0)
+        self.ast_stack.append(cont)
+         

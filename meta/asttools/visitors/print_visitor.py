@@ -8,6 +8,7 @@ from __future__ import print_function
 from meta.asttools import Visitor
 import sys
 import _ast
+from warnings import warn
 
 if sys.version_info.major < 3:
     from StringIO import StringIO
@@ -95,6 +96,13 @@ class ASTPrinter(Visitor):
 
         self.print(nodename, noindent=True)
 
+        undefined = [attr for attr in node._fields if not hasattr(node, attr)]
+        if undefined:
+            warn('ast node %r does not have required field(s) %r ' % (clsname(node), undefined,), stacklevel=2)
+        undefined = [attr for attr in node._attributes if not hasattr(node, attr)]
+        if undefined:
+            warn('ast does %r not have required attribute(s) %r ' % (clsname(node), undefined,), stacklevel=2)
+        
         children = sorted([(attr, getattr(node, attr)) for attr in node._fields if hasattr(node, attr)])
 
         with self.indent(len(nodename)):

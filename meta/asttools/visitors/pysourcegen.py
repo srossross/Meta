@@ -236,6 +236,9 @@ class ExprSourceGen(Visitor):
                 print_comma(i)
                 self.print('{:node}', elt)
                 i += 1
+                
+            if len(node.elts) == 1:
+                self.print(',')
 
             self.print(brace[1])
 
@@ -575,8 +578,12 @@ class SourceGen(ExprSourceGen):
         self.print('if {:node}:', node.test, level=self.level if indent_first else 0)
 
         with self.indenter:
-            for expr in node.body:
-                self.visit(expr)
+            if node.body:
+                for expr in node.body:
+                    self.visit(expr)
+            else:
+                self.print('pass')
+                    
 
         if node.orelse and len(node.orelse) == 1 and isinstance(node.orelse[0], _ast.If):
             self.print('el'); self.visit(node.orelse[0], indent_first=False)
@@ -666,8 +673,12 @@ class SourceGen(ExprSourceGen):
         self.print('while {0:node}:', node.test)
 
         with self.indenter:
-            for expr in node.body:
-                self.visit(expr)
+            if node.body:
+                for expr in node.body:
+                    self.visit(expr)
+            else:
+                self.print("pass")
+                    
 
         if node.orelse:
             self.print('else:')
@@ -684,14 +695,19 @@ class SourceGen(ExprSourceGen):
     visitContinue = simple_string('continue\n')
 
     def visitReturn(self, node):
-        self.print('return {:node}\n', node.value)
+        if node.value is not None:
+            self.print('return {:node}\n', node.value)
 
     def visitTryExcept(self, node):
         self.print('try:')
 
         with self.indenter:
-            for stmnt in node.body:
-                self.visit(stmnt)
+            if node.body:
+                for stmnt in node.body:
+                    self.visit(stmnt)
+            else:
+                self.print('pass')
+                    
         for hndlr in node.handlers:
             self.visit(hndlr)
 
@@ -714,8 +730,11 @@ class SourceGen(ExprSourceGen):
             self.print(":")
 
         with self.indenter:
-            for stmnt in node.body:
-                self.visit(stmnt)
+            if node.body:
+                for stmnt in node.body:
+                    self.visit(stmnt)
+            else:
+                self.print('pass')
                 
     @visitExceptHandler.py3op
     def visitExceptHandler(self, node):
