@@ -1,7 +1,7 @@
 import unittest
 import sys
 import _ast
-from meta.decompile import make_module
+from meta.decompiler import make_module
 from meta.asttools import cmp_ast, print_ast
 from meta.testing import py2, py2only
 
@@ -38,15 +38,14 @@ class Base(unittest.TestCase):
 
 
 
-    def statement(self, stmnt, equiv=None):
+    def statement(self, stmnt, equiv=None, expected_ast=None):
 
+        expected_ast = compile(stmnt, filename, 'exec', _ast.PyCF_ONLY_AST) if expected_ast is None else expected_ast
+        code = compile(expected_ast, filename, 'exec')
+        
         if equiv is None:
-            expected_ast = compile(stmnt, filename, 'exec', _ast.PyCF_ONLY_AST)
-            code = compile(expected_ast, filename, 'exec')
             mod_ast = make_module(code)
         else:
-            expected_ast_ = compile(stmnt, filename, 'exec', _ast.PyCF_ONLY_AST)
-            code = compile(expected_ast_, filename, 'exec')
             mod_ast = make_module(code)
 
             expected_ast = compile(equiv, filename, 'exec', _ast.PyCF_ONLY_AST)

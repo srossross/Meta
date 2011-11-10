@@ -1,5 +1,5 @@
 
-from meta.decompile.instructions import make_module
+from meta.decompiler.instructions import make_module
 from meta.asttools.visitors.pysourcegen import dump_python_source
 
 def decompile(code, mode='exec'):

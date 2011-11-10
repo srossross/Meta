@@ -4,7 +4,7 @@ Decompiler module.
 This module can decompile arbitrary code objects into a python ast. 
 '''
 
-from meta.decompile.instructions import make_module, make_function
+from meta.decompiler.instructions import make_module, make_function
 
 import _ast
 import struct
@@ -67,7 +67,7 @@ from imp import get_magic
 def extract(binary):
     
     if len(binary) <= 8:
-        raise Exception("Binary pyc must be greater than 8 bytes got" % len(binary))
+        raise Exception("Binary pyc must be greater than 8 bytes (got %i)" % len(binary))
     
     magic = binary[:4]
     MAGIC = get_magic()

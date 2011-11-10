@@ -5,8 +5,8 @@ Created on Jul 14, 2011
 '''
 from __future__ import print_function
 
-from meta.decompile.simple_instructions import SimpleInstructions
-from meta.decompile.control_flow_instructions import CtrlFlowInstructions
+from meta.decompiler.simple_instructions import SimpleInstructions
+from meta.decompiler.control_flow_instructions import CtrlFlowInstructions
 import _ast
 from meta.asttools import print_ast
 from meta.utils import py3, py3op, py2op
@@ -45,7 +45,7 @@ def pop_return(stmnts):
 
 
 def make_module(code):
-        from meta.decompile.disassemble import disassemble
+        from meta.decompiler.disassemble import disassemble
         instructions = Instructions(disassemble(code))
         stmnts = instructions.stmnt()
 
@@ -63,7 +63,7 @@ def make_module(code):
 
 @py2op
 def make_function(code, defaults=None, lineno=0):
-        from meta.decompile.disassemble import disassemble
+        from meta.decompiler.disassemble import disassemble
 
         instructions = Instructions(disassemble(code))
 
@@ -113,7 +113,7 @@ def make_function(code, defaults=None, lineno=0):
 
 @make_function.py3op
 def make_function(code, defaults=None, annotations=(), kw_defaults=(), lineno=0):
-        from meta.decompile.disassemble import disassemble
+        from meta.decompiler.disassemble import disassemble
 
         instructions = Instructions(disassemble(code))
 
@@ -445,4 +445,4 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
 
     def MAKE_CLOSURE(self, instr):
         return self.MAKE_FUNCTION(instr)
-
+    

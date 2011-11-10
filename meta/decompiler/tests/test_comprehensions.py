@@ -4,7 +4,7 @@ Created on Nov 6, 2011
 @author: sean
 '''
 import unittest
-from meta.decompile.tests import Base
+from meta.decompiler.tests import Base
 
 class ListComprehension(Base):
     
@@ -180,3 +180,4 @@ class DictComprehension(Base):
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
+    
