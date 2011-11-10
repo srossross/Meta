@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='meta',
-    version='0.1.2',
+    version='0.1.3',
     author='Sean Ross-Ross, Enthought Inc.',
     author_email='srossross@enthought.com',
     maintainer='Sean Ross-Ross',
