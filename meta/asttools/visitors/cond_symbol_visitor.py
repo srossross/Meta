@@ -346,7 +346,9 @@ class ConditionalSymbolVisitor(Visitor):
 
         self.visit_list(node.body)
 
-
+    def visitReturn(self, node):
+        self.update_stable_rhs(get_symbols(node.value, ast.Load))
+        
 def csv(node):
     gen = ConditionalSymbolVisitor()
     gen.visit(node)

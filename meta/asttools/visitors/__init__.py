@@ -29,7 +29,7 @@ class Visitor(object):
 
     def visit_list(self, nodes, *args, **kwargs):
         for node in nodes:
-            self.visit(node, *args, **kwargs)
+            yield self.visit(node, *args, **kwargs)
 
     def visit(self, node, *args, **kwargs):
         node_name = type(node).__name__
