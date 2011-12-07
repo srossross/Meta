@@ -26,6 +26,11 @@ class LogicJumps(Base):
 
         stmnt = 'a if b else c'
         self.statement(stmnt)
+        
+    def test_if_expr_const_bug(self):
+
+        stmnt = '0 if 1 else 2'
+        self.statement(stmnt)
 
     def test_if_expr_assign(self):
 
