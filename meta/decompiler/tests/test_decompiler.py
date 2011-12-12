@@ -447,10 +447,22 @@ def a():
 '''
         self.statement(stmnt)
 
+
+    def test_nested_while_bug(self):
+        stmnt = '''
+if gid == 0:
+    output[0] = initial
+    while i < input.size:
+        output[0] += shared[i]
+'''
+        self.statement(stmnt)
+
         
     def test_aug_assign_slice(self):
         stmnt = 'c[idx:a:3] += b[idx:a]'
         self.statement(stmnt)
+        
+        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_assign']
     unittest.main()

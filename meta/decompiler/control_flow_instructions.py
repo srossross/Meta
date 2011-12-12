@@ -344,7 +344,7 @@ class CtrlFlowInstructions(object):
     
     def SETUP_LOOP(self, instr):
         to = instr.arg
-        loop_block = self.make_block(to, inclusive=False)
+        loop_block = self.make_block(to, inclusive=False, raise_=False)
 
         if 'FOR_ITER' in [opname[ins.op] for ins in loop_block]:
             self.for_loop(loop_block)
