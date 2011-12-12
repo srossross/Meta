@@ -355,7 +355,6 @@ class CtrlFlowInstructions(object):
         self.ast_stack.append(_ast.Break(lineno=instr.lineno, col_offset=0))
 
     def for_loop(self, loop_block):
-
         iter_block, _, body_else_block = split(loop_block, 'GET_ITER')
 
 #        for_iter = body_else_block[0]
@@ -379,7 +378,6 @@ class CtrlFlowInstructions(object):
 
         assert len(iter_stmnt) == 1
         iter_stmnt = iter_stmnt[0]
-
         body_lst = self.decompile_block(body_block[:], stack_items=[None], jump_map={for_iter.i:for_iter.to}).stmnt()
 
         assign_ = body_lst.pop(0)
@@ -515,7 +513,6 @@ class CtrlFlowInstructions(object):
 #        self.ast_stack.append(setcomp)
 
     def GET_ITER(self, instr):
-
         for_iter = self.ilst.pop(0)
 
         if for_iter.opname == 'CALL_FUNCTION':
@@ -607,18 +604,22 @@ class CtrlFlowInstructions(object):
 
 
     def gather_jumps(self, jump_instr):
-
+        
+        
         to = self.jump_map.get(jump_instr.to, jump_instr.to)
 #        if jump_instr.to in self.jump_map:
         assert to > jump_instr.i
 
+        #print("gather_jumps to:", to)
 
         and_block = self.make_block(to=to, inclusive=False, raise_=False)
+        
 
         jump_tos = {to}
         last_len = 0
         old_max = to
 
+        
         while len(jump_tos) != last_len:
             last_len = len(jump_tos)
 
@@ -633,6 +634,7 @@ class CtrlFlowInstructions(object):
                 new_block = self.make_block(to=old_max, inclusive=False, raise_=False)
                 and_block.extend(new_block)
 
+        #print("and_block", and_block)
         return and_block
 
     def process_logic(self, logic_block):
@@ -699,10 +701,11 @@ class CtrlFlowInstructions(object):
         self.ast_stack.append(ast_)
 
     def make_if(self, instr, left, and_block):
-
         block = [instr] + and_block[:-1]
 
-        maxmax = max(block, key=lambda ins: (0, 0) if (ins.op not in JUMP_OPS) else (ins.oparg, ins.i))
+        
+#        maxmax = max(block, key=lambda ins: (0, 0) if (ins.op not in JUMP_OPS) else (ins.oparg, ins.i))
+        maxmax = max(block, key=lambda ins: (0, 0) if (ins.op not in JUMP_OPS) else (self.jump_map.get(ins.oparg, ins.oparg), ins.i))
 
         idx = block.index(maxmax)
 
@@ -742,12 +745,12 @@ class CtrlFlowInstructions(object):
             else_ = []
 
         if_ = _ast.If(test=cond, body=body, orelse=else_, lineno=instr.lineno, col_offset=0)
-
+        
         self.ast_stack.append(if_)
 
 
     def POP_JUMP_IF_TRUE(self, instr):
-
+        
         left = self.ast_stack.pop()
 
         and_block = self.gather_jumps(instr)
@@ -762,10 +765,13 @@ class CtrlFlowInstructions(object):
             self.ast_stack.append(ast_)
 
     def POP_JUMP_IF_FALSE(self, instr):
+        
+        #print("POP_JUMP_IF_FALSE")
+        
         left = self.ast_stack.pop()
 
         and_block = self.gather_jumps(instr)
-
+        #This is an IF statement
         if and_block[-1].opname in ['JUMP_FORWARD', 'JUMP_ABSOLUTE', 'RETURN_VALUE']:
             
             #this happens if the function was going to return anyway
@@ -773,10 +779,13 @@ class CtrlFlowInstructions(object):
                 JUMP_FORWARD = Instruction(and_block[-1].i, 110, lineno=0)
                 JUMP_FORWARD.arg = instr.to
                 and_block.append(JUMP_FORWARD)
-                
+            
+            #print()
+            #print("make_if", instr, left, and_block)
+            #print()
             self.make_if(instr, left, and_block)
             return
-        else:
+        else: #This is an expression
             hi = self.process_logic([instr] + and_block)
             ast_ = self.logic_ast(instr, left, hi)
             self.ast_stack.append(ast_)

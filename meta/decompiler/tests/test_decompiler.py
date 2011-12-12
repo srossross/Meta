@@ -336,6 +336,23 @@ for x in (1,2):
 '''
         self.statement(stmnt)
 
+    def test_loop_01(self):
+        stmnt = '''
+if c > d:
+    if e > f:
+        g
+    h
+'''
+    def test_loop_bug(self):
+        stmnt = '''
+for a in b:
+    if c > d:
+        if e > f:
+            g
+        h
+'''
+        self.statement(stmnt)
+
 class Complex(Base):
 
     def test_if_in_for(self):
