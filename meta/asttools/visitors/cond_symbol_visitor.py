@@ -23,7 +23,6 @@ class ConditionalSymbolVisitor(Visitor):
 
         self.seen_break = False
 
-#    visitDefault = visit_children
     visitModule = visit_children
     visitPass = visit_children
 

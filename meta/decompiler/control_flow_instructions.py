@@ -823,6 +823,8 @@ class CtrlFlowInstructions(object):
         if isinstance(with_[0], _ast.Assign) and with_[0].value == 'WITH_BLOCK':
             assign = with_.pop(0)
             as_ = assign.targets[0]
+        else:
+            as_ = None
 
         body = with_
 
