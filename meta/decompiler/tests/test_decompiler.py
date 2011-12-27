@@ -26,6 +26,11 @@ class LogicJumps(Base):
 
         stmnt = 'a if b else c'
         self.statement(stmnt)
+        
+    def test_if_expr_const_bug(self):
+
+        stmnt = '0 if 1 else 2'
+        self.statement(stmnt)
 
     def test_if_expr_assign(self):
 
@@ -331,6 +336,23 @@ for x in (1,2):
 '''
         self.statement(stmnt)
 
+    def test_loop_01(self):
+        stmnt = '''
+if c > d:
+    if e > f:
+        g
+    h
+'''
+    def test_loop_bug(self):
+        stmnt = '''
+for a in b:
+    if c > d:
+        if e > f:
+            g
+        h
+'''
+        self.statement(stmnt)
+
 class Complex(Base):
 
     def test_if_in_for(self):
@@ -425,10 +447,22 @@ def a():
 '''
         self.statement(stmnt)
 
+
+    def test_nested_while_bug(self):
+        stmnt = '''
+if gid == 0:
+    output[0] = initial
+    while i < input.size:
+        output[0] += shared[i]
+'''
+        self.statement(stmnt)
+
         
     def test_aug_assign_slice(self):
         stmnt = 'c[idx:a:3] += b[idx:a]'
         self.statement(stmnt)
+        
+        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_assign']
     unittest.main()

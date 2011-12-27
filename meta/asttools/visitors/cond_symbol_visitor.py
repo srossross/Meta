@@ -23,7 +23,6 @@ class ConditionalSymbolVisitor(Visitor):
 
         self.seen_break = False
 
-#    visitDefault = visit_children
     visitModule = visit_children
     visitPass = visit_children
 
@@ -346,7 +345,9 @@ class ConditionalSymbolVisitor(Visitor):
 
         self.visit_list(node.body)
 
-
+    def visitReturn(self, node):
+        self.update_stable_rhs(get_symbols(node.value, ast.Load))
+        
 def csv(node):
     gen = ConditionalSymbolVisitor()
     gen.visit(node)

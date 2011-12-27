@@ -28,13 +28,13 @@ def decompile_func(func):
         raise TypeError('can not get ast from %r' % (func,))
 
     # For python 3
-    defaults = func.func_defaults if sys.version_info.major < 3 else func.__defaults__
-    if defaults:
-        default_names = code.co_varnames[:code.co_argcount][-len(defaults):]
-    else:
-        default_names = []
-    defaults = [_ast.Name(id='%s_default' % name, ctx=_ast.Load() , lineno=0, col_offset=0) for name in default_names]
-    ast_node = make_function(code, defaults=defaults, lineno=code.co_firstlineno)
+#    defaults = func.func_defaults if sys.version_info.major < 3 else func.__defaults__
+#    if defaults:
+#        default_names = code.co_varnames[:code.co_argcount][-len(defaults):]
+#    else:
+#        default_names = []
+#    defaults = [_ast.Name(id='%s_default' % name, ctx=_ast.Load() , lineno=0, col_offset=0) for name in default_names]
+    ast_node = make_function(code, defaults=[], lineno=code.co_firstlineno)
 
     return ast_node
 
