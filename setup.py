@@ -1,12 +1,11 @@
 # Copyright (c) 2008-2011 by Enthought, Inc.
 # All rights reserved.
 
-from os.path import join
 from setuptools import setup, find_packages
 
 setup(
     name='meta',
-    version='0.1.3',
+    version='0.2.1',
     author='Sean Ross-Ross, Enthought Inc.',
     author_email='srossross@enthought.com',
     maintainer='Sean Ross-Ross',
@@ -34,7 +33,6 @@ setup(
     license='BSD',
     packages=find_packages(),
     platforms=["Windows", "Linux", "Mac OS-X", "Unix", "Solaris"],
-    zip_safe=False,
     entry_points = {
                     'console_scripts': [
                                         'depyc = meta.scripts.depyc:main',
