@@ -22,10 +22,10 @@ def decompile_func(func):
     
     :return: ast.FunctionDef instance.
     '''
-
-    code = getattr(func, 'func_code', None)
-    if code is None:
-        raise TypeError('can not get ast from %r' % (func,))
+    if hasattr(func, 'func_code'):
+        code = func.func_code
+    else:
+        code = func.__code__
 
     # For python 3
 #    defaults = func.func_defaults if sys.version_info.major < 3 else func.__defaults__
