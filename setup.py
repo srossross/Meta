@@ -3,15 +3,20 @@
 
 from setuptools import setup, find_packages
 
+try:
+    long_description=open('README').read()
+except IOError as err:
+    long_description=str(err)
+
+
 setup(
     name='meta',
-    version='0.2.1',
+    version='0.2.4',
     author='Sean Ross-Ross, Enthought Inc.',
     author_email='srossross@enthought.com',
     maintainer='Sean Ross-Ross',
     maintainer_email='enthought-dev@enthought.com',
     url='http://srossross.github.com/Meta',
-    download_url=('https://github.com/srossross/Meta/downloads'),
     
     classifiers=[c.strip() for c in """\
         Development Status :: 5 - Production/Stable
@@ -28,7 +33,7 @@ setup(
         Topic :: Software Development :: Libraries
         """.splitlines() if len(c.strip()) > 0],
     description='Byte-code and ast programming tools',
-    long_description=open('README.rst').read(),
+    long_description=long_description,
     include_package_data=True,
     license='BSD',
     packages=find_packages(),
