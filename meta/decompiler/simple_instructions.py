@@ -893,6 +893,7 @@ class SimpleInstructions(object):
         value = self.ast_stack.pop()
         expr = self.ast_stack.pop()
         
+        expr = self.process_ifexpr(expr)
         
         if isinstance(expr, _ast.AugAssign):
             self.ast_stack.append(expr)
