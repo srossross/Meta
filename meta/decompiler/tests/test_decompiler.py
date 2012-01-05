@@ -353,6 +353,15 @@ for a in b:
 '''
         self.statement(stmnt)
 
+    def test_while_bug(self):
+        stmnt = '''
+while a:
+    q
+    while b:
+        w
+'''
+        self.statement(stmnt)
+
 class Complex(Base):
 
     def test_if_in_for(self):

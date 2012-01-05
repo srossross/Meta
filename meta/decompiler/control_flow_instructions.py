@@ -561,90 +561,52 @@ class CtrlFlowInstructions(object):
 
         loop_block_map = {instr.i:instr.op for instr in loop_block}
 
-        #Find the last conditional that will exit the loop
-        print('Find the last conditional that will exit the loop')
-        
-        
-#        pop_set = set()
-#        def func(instr):
-#            if instr.opname == 'POP_BLOCK':
-#                pop_set.add(instr.i)
-#                return False
-#            
-#            result = instr.opname == 'POP_JUMP_IF_FALSE' and (instr.oparg in loop_block_map) and opname[loop_block_map[instr.oparg]] == 'POP_BLOCK'
-#            
-#            result = result and instr.oparg not in pop_set
-#            print('result', result, instr.oparg, pop_set)
-#            return result
-        
-#        func = lambda instr: instr.opname == 'POP_JUMP_IF_FALSE' and (instr.oparg in loop_block_map) and opname[loop_block_map[instr.oparg]] == 'POP_BLOCK'
-    
         first_i = loop_block[0].i
         
         func = lambda instr: instr.opname == 'JUMP_ABSOLUTE' and instr.oparg == first_i
         body_index = rfind_index(loop_block[:-1], func)
          
-        pop_block = loop_block[body_index + 1]
-        
-        if pop_block.opname == 'POP_BLOCK':
+        if body_index is None:
+            const_while = True
+            body_index = len(loop_block) - 1
+        else:
+            if body_index + 1 < len(loop_block): 
+                pop_block = loop_block[body_index + 1]
+                const_while = pop_block.opname != 'POP_BLOCK'
+                const_else = True
+            else:
+                const_while = True
+                const_else = False
+           
+        if const_while:
+            test = _ast.Num(1, **kw)
+            body_ = self.decompile_block(loop_block[:body_index]).stmnt()
+
+            else_block = loop_block[body_index + 1:]
+            if else_block:
+                else_ = self.decompile_block(else_block).stmnt()
+            else:
+                else_ = []
+        else:
+            pop_block = loop_block[body_index + 1]
+            
             func = lambda instr: instr.opname in ['POP_JUMP_IF_FALSE', 'POP_JUMP_IF_TRUE'] and instr.oparg == pop_block.i
             idx = rfind_index(loop_block[:body_index], func)
-            cond_block = loop_block[:idx + 1]
-            print("cond_block", cond_block)
+            cond_block = loop_block[:idx]
 
             iter_stmnt = self.decompile_block(cond_block).stmnt()
             assert len(iter_stmnt) == 1
-            iter = iter_stmnt[0]
+            test = iter_stmnt[0]
             
-            print("body_block", loop_block[idx:body_index])
             body_ = self.decompile_block(loop_block[idx + 1:body_index]).stmnt()
 
-            if else_block[:-1]:
+            else_block = loop_block[body_index + 2:]
+            if else_block:
                 else_ = self.decompile_block(else_block[:]).stmnt()
             else:
                 else_ = []
 
-        else:
-            raise Exception
-        
-#        print("idx", idx)
-#
-#        # in python this would be while 1:
-#        if idx is None:
-#            body_block = loop_block
-#            body_ = self.decompile_block(body_block[:-1]).stmnt()
-#            while_ = _ast.While(test=_ast.Num(1, **kw), body=body_, orelse=[], **kw)
-#            self.ast_stack.append(while_)
-#            return
-#
-#        cond_block = loop_block[:idx]
-#        instr = loop_block[idx]
-#        block = loop_block[idx + 1:]
-#
-#        first_cond_ = cond_block[0]
-#        iter_stmnt = self.decompile_block(cond_block).stmnt()
-#
-#        assert len(iter_stmnt) == 1
-#
-#        iter = iter_stmnt[0]
-#        
-#        body_block, _POP_BLOCK, else_block = split_cond(block, func=lambda new_instr: instr.oparg == new_instr.i)
-#
-#        assert opname[_POP_BLOCK.op] == 'POP_BLOCK'
-#        
-#        print("instr", instr,)
-#        print("body_block", body_block)
-#        print("else_block", else_block)
-#
-#        assert opname[body_block[-1].op] == 'JUMP_ABSOLUTE' and body_block[-1].oparg == first_cond_.i
-#        body_ = self.decompile_block(body_block[:-1]).stmnt()
-#
-#        if else_block[:-1]:
-#            else_ = self.decompile_block(else_block[:]).stmnt()
-#        else:
-#            else_ = []
-
-        while_ = _ast.While(test=iter, body=body_, orelse=else_, **kw)
+        while_ = _ast.While(test=test, body=body_, orelse=else_, **kw)
 
         self.ast_stack.append(while_)
 
