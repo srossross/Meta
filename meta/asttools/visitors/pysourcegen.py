@@ -685,6 +685,8 @@ class SourceGen(ExprSourceGen):
             with self.indenter:
                 for expr in node.orelse:
                     self.visit(expr)
+            self.print('\n')
+        self.print('\n')
 
 
     def visitExpr(self, node):
