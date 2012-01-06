@@ -4,14 +4,19 @@
 from setuptools import setup, find_packages
 
 try:
-    long_description=open('README').read()
+    long_description = open('README.rst').read()
 except IOError as err:
-    long_description=str(err)
+    long_description = str(err)
+
+try:
+    version_str = open('version.txt').read()
+except IOError as err:
+    version_str = '???'
 
 
 setup(
     name='meta',
-    version='0.2.4',
+    version=version_str,
     author='Sean Ross-Ross, Enthought Inc.',
     author_email='srossross@enthought.com',
     maintainer='Sean Ross-Ross',
@@ -38,7 +43,7 @@ setup(
     license='BSD',
     packages=find_packages(),
     platforms=["Windows", "Linux", "Mac OS-X", "Unix", "Solaris"],
-    entry_points = {
+    entry_points={
                     'console_scripts': [
                                         'depyc = meta.scripts.depyc:main',
                                         ],

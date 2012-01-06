@@ -66,7 +66,9 @@ CMP_OPMAP = {'>=' :_ast.GtE,
              '>' :_ast.Gt,
              '<' :_ast.Lt,
              '==': _ast.Eq,
+             '!=': _ast.NotEq,
              'in': _ast.In,
+             'not in': _ast.NotIn,
              'is':_ast.Is,
              'is not':_ast.IsNot,
              }
@@ -891,6 +893,7 @@ class SimpleInstructions(object):
         value = self.ast_stack.pop()
         expr = self.ast_stack.pop()
         
+        expr = self.process_ifexpr(expr)
         
         if isinstance(expr, _ast.AugAssign):
             self.ast_stack.append(expr)
