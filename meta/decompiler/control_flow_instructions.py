@@ -615,18 +615,13 @@ class CtrlFlowInstructions(object):
         
         
         to = self.jump_map.get(jump_instr.to, jump_instr.to)
-#        if jump_instr.to in self.jump_map:
         assert to > jump_instr.i
 
-        #print("gather_jumps to:", to)
-
         and_block = self.make_block(to=to, inclusive=False, raise_=False)
-        
 
         jump_tos = {to}
         last_len = 0
         old_max = to
-
         
         while len(jump_tos) != last_len:
             last_len = len(jump_tos)

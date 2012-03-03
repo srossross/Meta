@@ -43,6 +43,38 @@ class LogicJumps(Base):
         stmnt = 'd.a = a if b else c'
         self.statement(stmnt)
 
+    def test_bug010(self):
+
+        stmnt = '''
+def foo():
+    if a:
+        return 1
+    else:
+        return 2 
+        '''
+        
+        equiv = '''
+def foo():
+    if a:
+        return 1
+    return 2
+    return None
+        '''
+        
+        self.statement(stmnt, equiv=equiv)
+
+    def test_bug011(self):
+
+        stmnt = '''
+def foo():
+    if a or b or c:
+        return 1
+    else:
+        return 2 
+        '''
+        
+        self.statement(stmnt)
+
 class Function(Base):
 
     def test_function(self):
@@ -360,6 +392,15 @@ while a:
     q
     while b:
         w
+'''
+        self.statement(stmnt)
+
+    def test_while_bug02(self):
+        stmnt = '''
+while 1:
+    b += y
+    if b < x: 
+        break        
 '''
         self.statement(stmnt)
 

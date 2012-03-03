@@ -340,7 +340,6 @@ class Simple(Base):
         self.statement(stmnt)
         
     def test_bug_001(self):
-        
         stmnt = 'a = 1; b = 2; (a, b) = (b, a)'
         self.statement(stmnt)
 

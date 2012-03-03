@@ -262,6 +262,7 @@ class SimpleInstructions(object):
     
     def RETURN_VALUE(self, instr):
         value = self.ast_stack.pop()
+        value = self.process_ifexpr(value)
         ret = _ast.Return(value=value, lineno=instr.lineno, col_offset=0)
 
         self.ast_stack.append(ret)
