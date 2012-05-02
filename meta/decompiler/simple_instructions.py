@@ -561,10 +561,11 @@ class SimpleInstructions(object):
         if locals_ is globals_:
             locals_ = None
 
-        if getattr(globals_, 'id',) == 'None':
+        if isinstance(globals_, _ast.Name) and getattr(globals_, 'id',) == 'None':
             globals_ = None
 
         exec_ = _ast.Exec(body=expr, globals=globals_, locals=locals_, lineno=instr.lineno, col_offset=0)
+        
         self.ast_stack.append(exec_)
 
     def DUP_TOP(self, instr):

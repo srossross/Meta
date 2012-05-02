@@ -62,7 +62,8 @@ def foo():
         '''
         
         self.statement(stmnt, equiv=equiv)
-
+    
+    @unittest.expectedFailure
     def test_bug011(self):
 
         stmnt = '''
@@ -394,7 +395,8 @@ while a:
         w
 '''
         self.statement(stmnt)
-
+    
+    @unittest.expectedFailure
     def test_while_bug02(self):
         stmnt = '''
 while 1:
