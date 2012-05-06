@@ -19,13 +19,20 @@ class ByteCodeConsumer(object):
         generic_consume = getattr(self, 'generic_consume', None)
         
         for instr in disassembler(self.code):
-            
             method_name = 'consume_%s' % (instr.opname)
             method = getattr(self, method_name, generic_consume)
             if not method:
                 raise AttributeError("class %r has no method %r" % (type(self).__name__, method_name))
             
+            self.instruction_pre(instr)
             method(instr)
+            self.instruction_post(instr)
+            
+    def instruction_pre(self, instr):
+        pass
+    
+    def instruction_post(self, instr):
+        pass
     
 
 class StackedByteCodeConsumer(ByteCodeConsumer):
