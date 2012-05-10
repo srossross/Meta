@@ -13,7 +13,7 @@ import sys
 import ast
 
 from meta.asttools import print_ast, python_source
-from meta.decompiler import extract
+from meta.bytecodetools.pyc_file import extract 
 from meta.decompiler.instructions import make_module
 from meta.decompiler.disassemble import print_code
 from meta.decompiler.recompile import create_pyc

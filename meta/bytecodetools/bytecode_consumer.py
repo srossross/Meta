@@ -3,7 +3,7 @@ Created on Apr 28, 2012
 
 @author: sean
 '''
-from .disassembler import disassembler
+from .disassembler_ import disassembler
 
 
 class ByteCodeConsumer(object):
