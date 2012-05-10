@@ -138,6 +138,11 @@ class Simple(Base):
         stmnt = 'exec a in b,c'
         self.statement(stmnt)
 
+    @py2only
+    def test_exec4(self):
+        stmnt = 'exec a in {2:1}, { }'
+        self.statement(stmnt)
+
     def test_import_star(self):
 
         stmnt = 'from a import *'
@@ -340,7 +345,6 @@ class Simple(Base):
         self.statement(stmnt)
         
     def test_bug_001(self):
-        
         stmnt = 'a = 1; b = 2; (a, b) = (b, a)'
         self.statement(stmnt)
 

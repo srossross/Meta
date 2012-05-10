@@ -27,6 +27,7 @@ class LogicJumps(Base):
         stmnt = 'a if b else c'
         self.statement(stmnt)
         
+    @unittest.skip("I think this may be a bug in python")
     def test_if_expr_const_bug(self):
 
         stmnt = '0 if 1 else 2'
@@ -40,6 +41,39 @@ class LogicJumps(Base):
     def test_if_expr_assignattr(self):
 
         stmnt = 'd.a = a if b else c'
+        self.statement(stmnt)
+
+    def test_bug010(self):
+
+        stmnt = '''
+def foo():
+    if a:
+        return 1
+    else:
+        return 2 
+        '''
+        
+        equiv = '''
+def foo():
+    if a:
+        return 1
+    return 2
+    return None
+        '''
+        
+        self.statement(stmnt, equiv=equiv)
+    
+    @unittest.expectedFailure
+    def test_bug011(self):
+
+        stmnt = '''
+def foo():
+    if a or b or c:
+        return 1
+    else:
+        return 2 
+        '''
+        
         self.statement(stmnt)
 
 class Function(Base):
@@ -359,6 +393,16 @@ while a:
     q
     while b:
         w
+'''
+        self.statement(stmnt)
+    
+    @unittest.expectedFailure
+    def test_while_bug02(self):
+        stmnt = '''
+while 1:
+    b += y
+    if b < x: 
+        break        
 '''
         self.statement(stmnt)
 

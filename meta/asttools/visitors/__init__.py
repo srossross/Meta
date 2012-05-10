@@ -28,8 +28,11 @@ class Visitor(object):
 
 
     def visit_list(self, nodes, *args, **kwargs):
+        
+        result = []
         for node in nodes:
-            yield self.visit(node, *args, **kwargs)
+            result.append(self.visit(node, *args, **kwargs))
+        return result
 
     def visit(self, node, *args, **kwargs):
         node_name = type(node).__name__

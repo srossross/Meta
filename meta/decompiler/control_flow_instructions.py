@@ -4,15 +4,15 @@ Created on Jul 14, 2011
 @author: sean
 '''
 from __future__ import print_function
-from opcode import *
+import opcode
 import _ast
-from meta.decompiler.disassemble import Instruction
+from meta.bytecodetools.instruction import Instruction
 from meta.asttools.visitors.print_visitor import print_ast
 from meta.utils import py3op, py2op, py3
 AND_JUMPS = ['JUMP_IF_FALSE_OR_POP', 'POP_JUMP_IF_FALSE']
 OR_JUMPS = ['JUMP_IF_TRUE_OR_POP', 'POP_JUMP_IF_TRUE']
 JUMPS = AND_JUMPS + OR_JUMPS
-JUMP_OPS = [opmap[name] for name in JUMPS]
+JUMP_OPS = [opcode.opmap[name] for name in JUMPS]
 
 
 def split(block, name):
@@ -123,7 +123,7 @@ class CtrlFlowInstructions(object):
             instr = handlers_blocks.pop(0)
             except_instrs.append(instr)
 
-            if (opname[instr.op] == 'COMPARE_OP') and (instr.arg == 'exception match'):
+            if (instr.opname == 'COMPARE_OP') and (instr.arg == 'exception match'):
 
                 jump = handlers_blocks.pop(0)
                 assert jump.opname == 'POP_JUMP_IF_FALSE'
@@ -148,10 +148,10 @@ class CtrlFlowInstructions(object):
                 exc_type = exec_stmnt[0]
 
 
-                if opname[except_instrs[-2].op] == 'STORE_NAME':
+                if except_instrs[-2].opname == 'STORE_NAME':
                     exc_name = _ast.Name(id=except_instrs[-2].arg, ctx=_ast.Store(), lineno=except_instrs[-2].lineno, col_offset=0)
                 else:
-                    assert opname[except_instrs[-2].op] == 'POP_TOP'
+                    assert except_instrs[-2].opname == 'POP_TOP'
                     exc_name = None
 
                 handler_body = []
@@ -163,7 +163,7 @@ class CtrlFlowInstructions(object):
 
                     handler_body.append(instr)
 
-                assert opname[handler_body[-1].op] == 'JUMP_FORWARD'
+                assert handler_body[-1].opname == 'JUMP_FORWARD'
                 ends.append(handler_body[-1].arg)
 
                 exc_body = self.decompile_block(handler_body[:-1]).stmnt()
@@ -177,7 +177,7 @@ class CtrlFlowInstructions(object):
 
                 except_instrs = []
 
-        assert opname[except_instrs[-1].op] == 'END_FINALLY'
+        assert except_instrs[-1].opname == 'END_FINALLY'
 
         if len(except_instrs) == 1:
             pass
@@ -346,7 +346,7 @@ class CtrlFlowInstructions(object):
         to = instr.arg
         loop_block = self.make_block(to, inclusive=False, raise_=False)
 
-        if 'FOR_ITER' in [opname[ins.op] for ins in loop_block]:
+        if 'FOR_ITER' in [ins.opname for ins in loop_block]:
             self.for_loop(loop_block)
         else:
             self.while_loop(instr, loop_block)
@@ -615,18 +615,13 @@ class CtrlFlowInstructions(object):
         
         
         to = self.jump_map.get(jump_instr.to, jump_instr.to)
-#        if jump_instr.to in self.jump_map:
         assert to > jump_instr.i
 
-        #print("gather_jumps to:", to)
-
         and_block = self.make_block(to=to, inclusive=False, raise_=False)
-        
 
         jump_tos = {to}
         last_len = 0
         old_max = to
-
         
         while len(jump_tos) != last_len:
             last_len = len(jump_tos)
@@ -647,9 +642,9 @@ class CtrlFlowInstructions(object):
 
     def process_logic(self, logic_block):
 
-        if opname[logic_block[0].op] in JUMPS:
+        if logic_block[0].opname in JUMPS:
             jump_instr = logic_block[0]
-            flag = 'OR' if opname[jump_instr.op] in OR_JUMPS else 'AND'
+            flag = 'OR' if jump_instr.opname in OR_JUMPS else 'AND'
             idx = find_index(logic_block, lambda instr: jump_instr.oparg == instr.i, default=None)
 
             if idx is None:
@@ -666,7 +661,7 @@ class CtrlFlowInstructions(object):
 #            if right is None:
             return LogicalOp(flag, right, parent, jump_instr.lineno)
         else:
-            idx = find_index(logic_block, lambda instr: opname[instr.op] in JUMPS, default=None)
+            idx = find_index(logic_block, lambda instr: instr.opname in JUMPS, default=None)
 
             if idx is None:
                 stmnts = self.decompile_block(logic_block).stmnt()
@@ -711,7 +706,6 @@ class CtrlFlowInstructions(object):
     def make_if(self, instr, left, and_block):
         block = [instr] + and_block[:-1]
 
-        
 #        maxmax = max(block, key=lambda ins: (0, 0) if (ins.op not in JUMP_OPS) else (ins.oparg, ins.i))
         maxmax = max(block, key=lambda ins: (0, 0) if (ins.op not in JUMP_OPS) else (self.jump_map.get(ins.oparg, ins.oparg), ins.i))
 

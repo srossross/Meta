@@ -11,8 +11,8 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   api/index.rst
-   license.rst
+   api/index
+   license
 
 Indices and tables
 ==================

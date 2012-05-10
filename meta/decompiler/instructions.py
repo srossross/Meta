@@ -93,7 +93,13 @@ def make_function(code, defaults=None, lineno=0):
                               lineno=lineno, col_offset=0
                               )
         if code.co_name == '<lambda>':
-            assert len(stmnts) == 1
+            if len(stmnts) == 2:
+                if isinstance(stmnts[0], _ast.If) and isinstance(stmnts[1], _ast.Return):
+                    assert len(stmnts[0].body) == 1
+                    assert isinstance(stmnts[0].body[0], _ast.Return)
+                    stmnts = [_ast.Return(_ast.IfExp(stmnts[0].test, stmnts[0].body[0].value, stmnts[1].value))]
+                    
+            assert len(stmnts) == 1, stmnts
             assert isinstance(stmnts[0], _ast.Return)
 
             stmnt = stmnts[0].value
@@ -202,7 +208,12 @@ def make_function(code, defaults=None, annotations=(), kw_defaults=(), lineno=0)
         
         
         if code.co_name == '<lambda>':
-            assert len(stmnts) == 1
+            if len(stmnts) == 2:
+                if isinstance(stmnts[0], _ast.If) and isinstance(stmnts[1], _ast.Return):
+                    assert len(stmnts[0].body) == 1
+                    assert isinstance(stmnts[0].body[0], _ast.Return)
+                    stmnts = [_ast.Return(_ast.IfExp(stmnts[0].test, stmnts[0].body[0].value, stmnts[1].value))]
+
             assert isinstance(stmnts[0], _ast.Return)
 
             stmnt = stmnts[0].value
