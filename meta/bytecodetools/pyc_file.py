@@ -10,7 +10,11 @@ import struct
 import marshal
 
 def extract(binary):
+    '''
+    Extract a code object from a binary pyc file.
     
+    :param binary: a sequence of bytes from a pyc file.
+    '''
     if len(binary) <= 8:
         raise Exception("Binary pyc must be greater than 8 bytes (got %i)" % len(binary))
     
