@@ -706,7 +706,6 @@ class CtrlFlowInstructions(object):
     def make_if(self, instr, left, and_block):
         block = [instr] + and_block[:-1]
 
-#        maxmax = max(block, key=lambda ins: (0, 0) if (ins.op not in JUMP_OPS) else (ins.oparg, ins.i))
         maxmax = max(block, key=lambda ins: (0, 0) if (ins.op not in JUMP_OPS) else (self.jump_map.get(ins.oparg, ins.oparg), ins.i))
 
         idx = block.index(maxmax)
@@ -714,25 +713,29 @@ class CtrlFlowInstructions(object):
         assert idx is not None
 
         hi = self.process_logic(block[:idx + 1])
+        
         if hi.right is None and hi.parent is None:
             if instr.opname == 'POP_JUMP_IF_TRUE':
                 cond = _ast.UnaryOp(op=_ast.Not(), operand=left, lineno=0, col_offset=0)
-#                cond = ast.Not(left, lineno=instr.lineno)
             else:
                 cond = left
 
         else:
             cond = self.logic_ast(instr, left, hi)
-
-#        if block[-1].opname == 'JUMP_ABSOLUTE':
-#            pass
-
-        body = self.decompile_block(block[idx + 1:]).stmnt()
-
-#        tests = [(cond, body)]
-
+            
         jump = and_block[-1]
-        else_block = self.make_block(jump.to, inclusive=False, raise_=False)
+        
+        if jump.opname == 'RETURN_VALUE':
+            body_block = block[idx + 1:] + [jump]
+        else:
+            body_block = block[idx + 1:]
+            
+        body = self.decompile_block(body_block).stmnt()
+        
+        if jump.is_jump:
+            else_block = self.make_block(jump.to, inclusive=False, raise_=False)
+        else: # it is a return
+            else_block = []
 
         if len(else_block):
             else_ = self.decompile_block(else_block).stmnt()
@@ -757,7 +760,7 @@ class CtrlFlowInstructions(object):
 
         and_block = self.gather_jumps(instr)
 
-        if and_block[-1].opname in ['JUMP_FORWARD', 'JUMP_ABSOLUTE']:
+        if and_block[-1].opname in ['JUMP_FORWARD', 'JUMP_ABSOLUTE', 'RETURN_VALUE']:
 
             self.make_if(instr, left, and_block)
             return
@@ -774,6 +777,7 @@ class CtrlFlowInstructions(object):
 
         and_block = self.gather_jumps(instr)
         #This is an IF statement
+        
         if and_block[-1].opname in ['JUMP_FORWARD', 'JUMP_ABSOLUTE', 'RETURN_VALUE']:
             
             #this happens if the function was going to return anyway

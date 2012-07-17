@@ -28,6 +28,11 @@ class Instruction(object):
     @property
     def opname(self):
         return opcode.opname[self.op]
+    
+    @property
+    def is_jump(self):
+        return self.op in opcode.hasjrel or self.op in opcode.hasjabs
+    
     @property
     def to(self):
         if self.op in opcode.hasjrel:

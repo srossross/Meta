@@ -515,6 +515,17 @@ if gid == 0:
         stmnt = 'c[idx:a:3] += b[idx:a]'
         self.statement(stmnt)
         
+    def test_issue_4(self):
+        example = """
+def example(idx):
+   if(idx == 2 or idx == 3):
+      idx = 1
+      return None
+   i += 1
+   return None
+        """
+        self.statement(example)
+        
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_assign']
