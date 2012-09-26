@@ -296,7 +296,7 @@ class ConditionalSymbolVisitor(Visitor):
             self.update_stable_rhs(get_symbols(node.type, ast.Load))
 
         if node.name:
-            self.update_stable_lhs({node.name})
+            self.update_stable_lhs(set([node.name]))
 
         self.visit_list(node.body)
 
