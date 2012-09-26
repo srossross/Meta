@@ -11,7 +11,7 @@ from dis import findlabels, findlinestarts
 import sys
 from meta.bytecodetools.instruction import Instruction
 
-py3 = sys.version_info.major >= 3
+py3 = sys.version_info[0] >= 3
 co_ord = (lambda c:c) if py3 else ord
 
 def disassembler(co, lasti= -1):

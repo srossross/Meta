@@ -315,7 +315,7 @@ class ConditionalSymbolVisitor(Visitor):
     def visitLambda(self, node):
 
         gen = ConditionalSymbolVisitor()
-        gen.update_stable_lhs(symbols={arg for arg in node.args.args})
+        gen.update_stable_lhs(symbols=set(arg for arg in node.args.args))
         gen.visit_list(node.body)
 
         self.update_stable_rhs(gen.undefined)
@@ -325,10 +325,10 @@ class ConditionalSymbolVisitor(Visitor):
         for decorator in node.decorator_list:
             self.update_stable_rhs(get_symbols(decorator, ast.Load))
 
-        self.update_stable_lhs({node.name})
+        self.update_stable_lhs(set([node.name]))
 
         gen = ConditionalSymbolVisitor()
-        gen.update_stable_lhs(symbols={arg for arg in node.args.args})
+        gen.update_stable_lhs(symbols=set(arg for arg in node.args.args))
         gen.visit_list(node.body)
 
         self.update_stable_rhs(gen.undefined)

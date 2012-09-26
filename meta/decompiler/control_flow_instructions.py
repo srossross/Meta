@@ -559,7 +559,9 @@ class CtrlFlowInstructions(object):
 
         kw = dict(lineno=instr.lineno, col_offset=0)
 
-        loop_block_map = {instr.i:instr.op for instr in loop_block}
+        loop_block_map = {}
+        for instr in loop_block:
+            loop_block_map[instr.i] = instr.op
 
         first_i = loop_block[0].i
         
@@ -619,7 +621,7 @@ class CtrlFlowInstructions(object):
 
         and_block = self.make_block(to=to, inclusive=False, raise_=False)
 
-        jump_tos = {to}
+        jump_tos = set([to])
         last_len = 0
         old_max = to
         

@@ -29,7 +29,7 @@ class SymbolVisitor(Visitor):
 
     def visitName(self, node):
         if isinstance(node.ctx, self.ctx_types):
-            return {node.id}
+            return set([node.id])
         else:
             return set()
 
@@ -41,7 +41,7 @@ class SymbolVisitor(Visitor):
             name = name.split('.', 1)[0]
 
         if ast.Store in self.ctx_types:
-            return {name}
+            return set([name])
         else:
             return set()
 
