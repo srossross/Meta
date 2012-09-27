@@ -1,7 +1,7 @@
 Meta
 ====
 
-![Build Status](https://secure.travis-ci.org/srossross/Meta.png)](http://travis-ci.org/srossross/Meta)
+![Build Status](https://secure.travis-ci.org/srossross/Meta.png)
 
 A Pure Python module containing a framework to manipulate and analyze 
 python ast's and bytecode.
