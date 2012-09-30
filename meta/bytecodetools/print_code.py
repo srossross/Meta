@@ -3,13 +3,15 @@ Created on May 10, 2012
 
 @author: sean
 '''
+from __future__ import print_function
+
 from .bytecode_consumer import ByteCodeConsumer
 from argparse import ArgumentParser
 
 class ByteCodePrinter(ByteCodeConsumer):
     
     def generic_consume(self, instr):
-        print instr
+        print(instr)
 
 def main():
     parser = ArgumentParser()
