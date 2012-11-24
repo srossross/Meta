@@ -255,11 +255,12 @@ def bitrange(x, start, stop):
 level = 0
 class Instructions(CtrlFlowInstructions, SimpleInstructions):
 
-    def __init__(self, ilst, stack_items=None, jump_map=False):
+    def __init__(self, ilst, stack_items=None, jump_map=False, outer_scope=None):
         self.ilst_processed = []
         self.ilst = ilst[:]
         self.orig_ilst = ilst
         self.seen_yield = False
+        self.outer_scope = outer_scope
 
         if jump_map:
             self.jump_map = jump_map
@@ -267,14 +268,21 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
             self.jump_map = {}
 
 #        self.ast_stack = StackLogger()
-        self.ast_stack = []
+        self._ast_stack = []
 
         if stack_items:
-            self.ast_stack.extend(stack_items)
-
-    @classmethod
-    def decompile_block(cls, ilst, stack_items=None, jump_map=False):
-        return Instructions(ilst, stack_items=stack_items, jump_map=jump_map)
+            self._ast_stack.extend(stack_items)
+    
+    def pop_ast_item(self):
+        if self._ast_stack:
+            return self._ast_stack.pop()
+        return self.outer_scope.pop_ast_item()
+    
+    def push_ast_item(self, item):
+        self._ast_stack.append(item)
+    
+    def decompile_block(self, ilst, stack_items=None, jump_map=False):
+        return Instructions(ilst, stack_items=stack_items, jump_map=jump_map, outer_scope=self)
 
     def stmnt(self):
 
@@ -282,7 +290,7 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
             instr = self.ilst.pop(0)
             self.visit(instr)
 
-        return self.ast_stack
+        return self._ast_stack
 
     def visit(self, instr):
         global level
@@ -324,7 +332,7 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
     @py3op
     def MAKE_FUNCTION(self, instr):
 
-        code = self.ast_stack.pop()
+        code = self.pop_ast_item()
         
         ndefaults = bitrange(instr.oparg, 0, 8)
         nkwonly_defaults = bitrange(instr.oparg, 8, 16)
@@ -332,15 +340,15 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
         
         annotations = []
         for i in range(nannotations):
-            annotations.insert(0, self.ast_stack.pop())
+            annotations.insert(0, self.pop_ast_item())
         
         kw_defaults = []
         for i in range(nkwonly_defaults * 2):
-            kw_defaults.insert(0, self.ast_stack.pop())
+            kw_defaults.insert(0, self.pop_ast_item())
             
         defaults = []
         for i in range(ndefaults):
-            defaults.insert(0, self.ast_stack.pop())
+            defaults.insert(0, self.pop_ast_item())
 
         function = make_function(code, defaults, lineno=instr.lineno, annotations=annotations, kw_defaults=kw_defaults)
         
@@ -350,18 +358,18 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
             function.body.insert(0, _ast.Expr(value=_ast.Str(s=doc, lineno=instr.lineno, col_offset=0),
                                               lineno=instr.lineno, col_offset=0))
             
-        self.ast_stack.append(function)
+        self.push_ast_item(function)
         
     @MAKE_FUNCTION.py2op
     def MAKE_FUNCTION(self, instr):
 
-        code = self.ast_stack.pop()
+        code = self.pop_ast_item()
 
         ndefaults = instr.oparg
 
         defaults = []
         for i in range(ndefaults):
-            defaults.insert(0, self.ast_stack.pop())
+            defaults.insert(0, self.pop_ast_item())
 
         function = make_function(code, defaults, lineno=instr.lineno)
         
@@ -372,10 +380,10 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
                                               lineno=instr.lineno, col_offset=0))
 
         
-        self.ast_stack.append(function)
+        self.push_ast_item(function)
 
     def LOAD_LOCALS(self, instr):
-        self.ast_stack.append('LOAD_LOCALS')
+        self.push_ast_item('LOAD_LOCALS')
     
     @py3op
     def LOAD_BUILD_CLASS(self, instr):
@@ -419,12 +427,12 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
                                lineno=instr.lineno, col_offset=0,
                                )
 
-        self.ast_stack.append(class_)
+        self.push_ast_item(class_)
     
     @py2op
     def BUILD_CLASS(self, instr):
 
-        call_func = self.ast_stack.pop()
+        call_func = self.pop_ast_item()
 
         assert isinstance(call_func, _ast.Call)
 
@@ -440,19 +448,19 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
 
         assert isinstance(ret, _ast.Return) and ret.value == 'LOAD_LOCALS'
 
-        bases = self.ast_stack.pop()
+        bases = self.pop_ast_item()
 
         assert isinstance(bases, _ast.Tuple)
         bases = bases.elts
-        name = self.ast_stack.pop()
+        name = self.pop_ast_item()
 
         class_ = _ast.ClassDef(name=name, bases=bases, body=code, decorator_list=[],
                                lineno=instr.lineno, col_offset=0)
 
-        self.ast_stack.append(class_)
+        self.push_ast_item(class_)
 
     def LOAD_CLOSURE(self, instr):
-        self.ast_stack.append('CLOSURE')
+        self.push_ast_item('CLOSURE')
 
     def MAKE_CLOSURE(self, instr):
         return self.MAKE_FUNCTION(instr)

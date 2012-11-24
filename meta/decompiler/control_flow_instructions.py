@@ -222,7 +222,7 @@ class CtrlFlowInstructions(object):
 
         try_finally = _ast.TryFinally(body=try_except, finalbody=finally_)
         
-        self.ast_stack.append(try_finally)
+        self.push_ast_item(try_finally)
 
 #    @py3op
     def do_except_block(self, block):
@@ -240,7 +240,7 @@ class CtrlFlowInstructions(object):
 
         body = self.decompile_block(handler_block).stmnt()
         
-        self.ast_stack.extend(body)
+        self._ast_stack.extend(body)
         
 #    @py2op
 #    def SETUP_FINALLY(self, instr):
@@ -306,7 +306,7 @@ class CtrlFlowInstructions(object):
 
         try_except = _ast.TryExcept(body=body, handlers=handlers, orelse=else_, lineno=instr.lineno, col_offset=0)
 
-        self.ast_stack.append(try_except)
+        self.push_ast_item(try_except)
 
     @SETUP_EXCEPT.py3op
     def SETUP_EXCEPT(self, instr):
@@ -336,7 +336,7 @@ class CtrlFlowInstructions(object):
 
         try_except = _ast.TryExcept(body=body, handlers=handlers, orelse=else_, lineno=instr.lineno, col_offset=0)
 
-        self.ast_stack.append(try_except)
+        self.push_ast_item(try_except)
     
     @py3op
     def POP_EXCEPT(self, instr):
@@ -352,7 +352,7 @@ class CtrlFlowInstructions(object):
             self.while_loop(instr, loop_block)
 
     def BREAK_LOOP(self, instr):
-        self.ast_stack.append(_ast.Break(lineno=instr.lineno, col_offset=0))
+        self.push_ast_item(_ast.Break(lineno=instr.lineno, col_offset=0))
 
     def for_loop(self, loop_block):
         iter_block, _, body_else_block = split(loop_block, 'GET_ITER')
@@ -391,7 +391,7 @@ class CtrlFlowInstructions(object):
         assign = assign_.targets[0]
         for_ = _ast.For(target=assign, iter=iter_stmnt, body=body, orelse=else_, lineno=iter_stmnt.lineno, col_offset=0)
 
-        self.ast_stack.append(for_)
+        self.push_ast_item(for_)
 
     def make_list_comp(self, get_iter, for_iter):
 
@@ -412,10 +412,11 @@ class CtrlFlowInstructions(object):
     
             assert isinstance(assign, _ast.Assign)
     
-            list_expr = self.ast_stack.pop()
+    
+            list_expr = self.pop_ast_item()
     
             # empty ast.List object
-            list_ = self.ast_stack.pop()
+            list_ = self.pop_ast_item()
     
             ifs = []
             elt = refactor_ifs(stmnts[0], ifs)
@@ -430,20 +431,20 @@ class CtrlFlowInstructions(object):
             
             list_comp = _ast.ListComp(elt=elt, generators=generators, lineno=get_iter.lineno, col_offset=0)
         else:
-            list_expr = self.ast_stack.pop()
+            list_expr = self.pop_ast_item()
             list_comp = stmnts[0]
             
             generators = list_comp.generators
             
             # empty ast.List object
-            list_ = self.ast_stack.pop()
+            list_ = self.pop_ast_item()
             if not isinstance(list_, _ast.Assign):
                 comp = _ast.comprehension(target=list_.targets[0], iter=None, ifs=[], lineno=get_iter.lineno, col_offset=0)
                 generators.insert(0, comp)
                 
             generators[0].iter = list_expr
 
-        self.ast_stack.append(list_comp)
+        self.push_ast_item(list_comp)
 
     def extract_listcomp(self, function, sequence):
 
@@ -460,7 +461,7 @@ class CtrlFlowInstructions(object):
                 generator.iter = sequence
         
         setcomp = _ast.ListComp(elt=value.elt, generators=generators, lineno=value.lineno, col_offset=0)
-        self.ast_stack.append(setcomp)
+        self.push_ast_item(setcomp)
         
     def extract_setcomp(self, function, sequence):
         
@@ -477,7 +478,7 @@ class CtrlFlowInstructions(object):
                 generator.iter = sequence
         
         setcomp = _ast.SetComp(elt=value.elt, generators=generators, lineno=value.lineno, col_offset=0)
-        self.ast_stack.append(setcomp)
+        self.push_ast_item(setcomp)
 
     def extract_dictcomp(self, function, sequence):
 
@@ -494,7 +495,7 @@ class CtrlFlowInstructions(object):
                 generator.iter = sequence
         
         setcomp = _ast.DictComp(key=value.elt[0], value=value.elt[1], generators=generators, lineno=value.lineno, col_offset=0)
-        self.ast_stack.append(setcomp)
+        self.push_ast_item(setcomp)
 #
 #        assert len(function.code.nodes) == 1
 #        assert isinstance(function.code.nodes[0], _ast.Return)
@@ -510,7 +511,7 @@ class CtrlFlowInstructions(object):
 #            qual.list = sequence
 #
 #        setcomp = _ast.DictComp(key=key, value=value, generators=quals, lineno=value.lineno, col_offset=0)
-#        self.ast_stack.append(setcomp)
+#        self.push_ast_item(setcomp)
 
     def GET_ITER(self, instr):
         for_iter = self.ilst.pop(0)
@@ -519,8 +520,8 @@ class CtrlFlowInstructions(object):
             call_function = for_iter
             assert call_function.oparg == 1
 
-            sequence = self.ast_stack.pop()
-            function = self.ast_stack.pop()
+            sequence = self.pop_ast_item()
+            function = self.pop_ast_item()
 
             if function.name == '<listcomp>':
                 self.extract_listcomp(function, sequence)
@@ -542,10 +543,10 @@ class CtrlFlowInstructions(object):
         pass
 
     def MAP_ADD(self, instr):
-        key = self.ast_stack.pop()
-        value = self.ast_stack.pop()
+        key = self.pop_ast_item()
+        value = self.pop_ast_item()
 
-        self.ast_stack.append((key, value))
+        self.push_ast_item((key, value))
         'NOP'
 
     def SET_ADD(self, instr):
@@ -608,7 +609,7 @@ class CtrlFlowInstructions(object):
 
         while_ = _ast.While(test=test, body=body_, orelse=else_, **kw)
 
-        self.ast_stack.append(while_)
+        self.push_ast_item(while_)
 
 
     def gather_jumps(self, jump_instr):
@@ -696,12 +697,12 @@ class CtrlFlowInstructions(object):
         return ast_
 
     def JUMP_IF_TRUE_OR_POP(self, instr):
-        left = self.ast_stack.pop()
+        left = self.pop_ast_item()
 
         and_block = self.gather_jumps(instr)
         hi = self.process_logic([instr] + and_block)
         ast_ = self.logic_ast(instr, left, hi)
-        self.ast_stack.append(ast_)
+        self.push_ast_item(ast_)
 
     def make_if(self, instr, left, and_block):
         block = [instr] + and_block[:-1]
@@ -751,12 +752,12 @@ class CtrlFlowInstructions(object):
 
         if_ = _ast.If(test=cond, body=body, orelse=else_, lineno=instr.lineno, col_offset=0)
         
-        self.ast_stack.append(if_)
+        self.push_ast_item(if_)
 
 
     def POP_JUMP_IF_TRUE(self, instr):
         
-        left = self.ast_stack.pop()
+        left = self.pop_ast_item()
 
         and_block = self.gather_jumps(instr)
 
@@ -767,13 +768,13 @@ class CtrlFlowInstructions(object):
         else:
             hi = self.process_logic([instr] + and_block)
             ast_ = self.logic_ast(instr, left, hi)
-            self.ast_stack.append(ast_)
+            self.push_ast_item(ast_)
 
     def POP_JUMP_IF_FALSE(self, instr):
         
         #print("POP_JUMP_IF_FALSE")
         
-        left = self.ast_stack.pop()
+        left = self.pop_ast_item()
 
         and_block = self.gather_jumps(instr)
         #This is an IF statement
@@ -794,19 +795,19 @@ class CtrlFlowInstructions(object):
         else: #This is an expression
             hi = self.process_logic([instr] + and_block)
             ast_ = self.logic_ast(instr, left, hi)
-            self.ast_stack.append(ast_)
+            self.push_ast_item(ast_)
 
     def JUMP_IF_FALSE_OR_POP(self, instr):
-        left = self.ast_stack.pop()
+        left = self.pop_ast_item()
 
         and_block = self.gather_jumps(instr)
         hi = self.process_logic([instr] + and_block)
         ast_ = self.logic_ast(instr, left, hi)
-        self.ast_stack.append(ast_)
+        self.push_ast_item(ast_)
 
     def JUMP_ABSOLUTE(self, instr):
         continue_ = _ast.Continue(lineno=instr.lineno, col_offset=0)
-        self.ast_stack.append(continue_)
+        self.push_ast_item(continue_)
 
     def JUMP_FORWARD(self, instr):
         pass
@@ -834,14 +835,14 @@ class CtrlFlowInstructions(object):
 
         body = with_
 
-        expr = self.ast_stack.pop()
+        expr = self.pop_ast_item()
 
         with_ = _ast.With(context_expr=expr, optional_vars=as_, body=body,
                           lineno=instr.lineno, col_offset=0)
 
-        self.ast_stack.append(with_)
+        self.push_ast_item(with_)
         
     def CONTINUE_LOOP(self, instr):
         cont = _ast.Continue(lineno=instr.lineno, col_offset=0)
-        self.ast_stack.append(cont)
+        self.push_ast_item(cont)
          
