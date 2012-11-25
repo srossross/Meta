@@ -367,6 +367,10 @@ else:
         pass'''
         self.assertSame(source)
 
+    def test_cmp(self):
+        source = '(a > b > c)'
+        self.assertSame(source)
+
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_expr']
     unittest.main(exit=False)

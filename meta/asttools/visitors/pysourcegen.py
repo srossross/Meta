@@ -243,10 +243,10 @@ class ExprSourceGen(Visitor):
             self.print(brace[1])
 
     def visitCompare(self, node):
-        self.print('({0:node} ', node.left)
+        self.print('({0:node}', node.left)
         with self.no_indent:
             for (op, right) in zip(node.ops, node.comparators):
-                self.print('{0:node} {1:node}' , op, right)
+                self.print(' {0:node} {1:node}' , op, right)
             self.print(')')
 
     @py2op
