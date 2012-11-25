@@ -117,9 +117,10 @@ def reduce_cmp(right):
     if isinstance(right, LogicalOp) and right.flag == 'AND':
         right.right = reduce_cmp(right.right)
         if isinstance(right.right, _ast.Compare) and isinstance(right.parent, _ast.Compare):
-            right.parent.ops.extend(right.right.ops)
-            right.parent.comparators.extend(right.right.comparators)
-            right = right.parent
+            if right.parent.comparators[-1] is  right.right.left:
+                right.parent.ops.extend(right.right.ops)
+                right.parent.comparators.extend(right.right.comparators)
+                right = right.parent
             
     return right
 
@@ -135,7 +136,7 @@ def JUMP_IF_X_OR_POP(operand):
         hi.right = reduce_cmp(hi.right)
         
         if isinstance(hi.right, _ast.Compare):
-            if isinstance(left, _ast.Compare):
+            if isinstance(left, _ast.Compare) and left.comparators[-1] is hi.right.left:
                 left.ops.extend(hi.right.ops)
                 left.comparators.extend(hi.right.comparators)
             else:
@@ -147,7 +148,7 @@ def JUMP_IF_X_OR_POP(operand):
              
         self.push_ast_item(left)
         
-        if len(self.ilst) >= 2 and self.ilst[0].opname == 'ROT_TWO' and self.ilst[1].opname == 'POP_TOP':
+        if len(self.ilst) >= 2 and [ii.opname for ii in self.ilst[:2]] == ['ROT_TWO', 'POP_TOP']:
             self.ilst.pop(0)
             self.ilst.pop(0)
     return JUMP_IF_Y_OR_POP
@@ -704,7 +705,8 @@ class CtrlFlowInstructions(object):
             idx = find_index(logic_block, lambda instr: instr.opname in JUMPS, default=None)
 
             if idx is None:
-                if len(logic_block) == 3 and [ii.opname for ii in logic_block] == ['JUMP_FORWARD', 'ROT_TWO', 'POP_TOP']:
+                if len(logic_block) == 3 and [ii.opname for ii in logic_block[1:]] == ['ROT_TWO', 'POP_TOP']:
+                    assert logic_block[0].opname in ['JUMP_FORWARD', 'RETURN_VALUE'], logic_block 
                     return None
                 stmnts = self.decompile_block(logic_block).stmnt()
                 if len(stmnts) > 1:
@@ -715,7 +717,8 @@ class CtrlFlowInstructions(object):
                 right = logic_block[idx:]
                 parent = logic_block[:idx]
 
-                if len(parent) == 3 and [ii.opname for ii in parent] == ['JUMP_FORWARD', 'ROT_TWO', 'POP_TOP']:
+                if len(parent) == 3 and [ii.opname for ii in parent[1:]] == ['ROT_TWO', 'POP_TOP']:
+                    assert parent[0].opname in ['JUMP_FORWARD', 'RETURN_VALUE'], parent
                     parent = None
                 else:
                     stmnts = self.decompile_block(parent).stmnt()
@@ -734,7 +737,7 @@ class CtrlFlowInstructions(object):
                     if right.parent is None:
                         right.parent = parent
                     else:
-                        right,to_insrt = parse_logic(right)
+                        right, to_insrt = parse_logic(right)
                         to_insrt.insert(0, parent)
                         return right
                         
