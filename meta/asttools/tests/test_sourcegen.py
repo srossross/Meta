@@ -370,6 +370,10 @@ else:
     def test_cmp(self):
         source = '(a > b > c)'
         self.assertSame(source)
+        
+    def test_logical(self):
+        source = '(a and b and c)'
+        self.assertSame(source)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_expr']

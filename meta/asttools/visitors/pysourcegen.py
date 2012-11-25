@@ -408,10 +408,11 @@ class ExprSourceGen(Visitor):
             values = list(node.values)
             left = values.pop(0)
 
-            self.print('({:node} ', left)
+            self.print('({:node}', left)
             while values:
                 left = values.pop(0)
-                self.print('{0:node} {1:node})', node.op, left)
+                self.print(' {0:node} {1:node}', node.op, left)
+            self.print(')')
 
     def visitIfExp(self, node):
         self.print('{body:node} if {test:node} else {orelse:node}', **node.__dict__)
