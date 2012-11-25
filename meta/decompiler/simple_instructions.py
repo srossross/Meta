@@ -427,8 +427,6 @@ class SimpleInstructions(object):
 
         right = self.pop_ast_item()
         
-#        if getattr(right,'id') == 'f':
-#            import pdb;pdb.set_trace()
         expr = self.pop_ast_item()
 
         OP = CMP_OPMAP[op]
