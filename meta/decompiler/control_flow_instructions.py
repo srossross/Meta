@@ -112,6 +112,8 @@ class LogicalOp(object):
 
 
 def reduce_cmp(right):
+    if isinstance(right, _ast.Return):
+        return right.value
     if isinstance(right, LogicalOp) and right.flag == 'AND':
         right.right = reduce_cmp(right.right)
         if isinstance(right.right, _ast.Compare) and isinstance(right.parent, _ast.Compare):
