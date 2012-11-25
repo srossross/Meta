@@ -244,7 +244,7 @@ class StackLogger(list):
 
     def pop(self, *index):
         value = list.pop(self, *index)
-        print('    + ', end='')
+        print('    - ', end='')
         print_ast(value, indent='', newline='')
         print()
         return value
@@ -275,10 +275,22 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
     
     def pop_ast_item(self):
         if self._ast_stack:
-            return self._ast_stack.pop()
-        return self.outer_scope.pop_ast_item()
+            item = self._ast_stack.pop()
+        else:
+            item = self.outer_scope.pop_ast_item()
+
+#        print(' ' * level, '- ', end='')
+#        print_ast(item, indent='', newline='')
+#        print()
+
+        return item
     
     def push_ast_item(self, item):
+        
+#        print(' ' * level, '+ ', end='')
+#        print_ast(item, indent='', newline='')
+#        print()
+
         self._ast_stack.append(item)
     
     def decompile_block(self, ilst, stack_items=None, jump_map=False):
@@ -300,11 +312,11 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
         if method is None:
             raise AttributeError('can not handle instruction %r' % (str(instr)))
         
-#        print(' ' * level, "+ visit:", repr(instr))
+#        print(' ' * level, "*%s* visit:" % instr.opname, repr(instr))
 #        level += 1
         method(instr)
 #        level -= 1
-#        print(' ' * level, "- stack:", self.ast_stack)
+#        print(' ' * level, "* stack:", self._ast_stack)
 
 
     def make_block(self, to, inclusive=True, raise_=True):

@@ -111,6 +111,45 @@ class LogicalOp(object):
         return '%s(%r, parent=%r)' % (self.flag, self.right, self.parent)
 
 
+def reduce_cmp(right):
+    if isinstance(right, LogicalOp) and right.flag == 'AND':
+        right.right = reduce_cmp(right.right)
+        if isinstance(right.right, _ast.Compare) and isinstance(right.parent, _ast.Compare):
+            right.parent.ops.extend(right.right.ops)
+            right.parent.comparators.extend(right.right.comparators)
+            right = right.parent
+            
+    return right
+
+
+
+def JUMP_IF_X_OR_POP(operand):
+    def JUMP_IF_Y_OR_POP(self, instr):
+        left = self.pop_ast_item()
+        and_block = self.gather_jumps(instr)
+        hi = self.process_logic([instr] + and_block)
+        
+        # Compress (a > b) and (b > c) into (a > b > c)
+        hi.right = reduce_cmp(hi.right)
+        
+        if isinstance(hi.right, _ast.Compare):
+            if isinstance(left, _ast.Compare):
+                left.ops.extend(hi.right.ops)
+                left.comparators.extend(hi.right.comparators)
+            else:
+                left = _ast.BoolOp(op=operand(), values=[left, hi.right], lineno=instr.lineno, col_offset=0)
+        else:
+            bool_op, insert_into = parse_logic(hi)
+            insert_into.insert(0, left)
+            left = bool_op
+             
+        self.push_ast_item(left)
+        
+        if len(self.ilst) >= 2 and self.ilst[0].opname == 'ROT_TWO' and self.ilst[1].opname == 'POP_TOP':
+            self.ilst.pop(0)
+            self.ilst.pop(0)
+    return JUMP_IF_Y_OR_POP
+
 class CtrlFlowInstructions(object):
 
     def split_handlers(self, handlers_blocks):
@@ -169,7 +208,7 @@ class CtrlFlowInstructions(object):
                 exc_body = self.decompile_block(handler_body[:-1]).stmnt()
                 if not exc_body:
                     exc_body.append(_ast.Pass(lineno=except_instrs[-2].lineno, col_offset=0))
-                #is this for python 3?
+                # is this for python 3?
                 if py3 and exc_name is not None:
                     exc_name = exc_name.id
                     
@@ -273,8 +312,8 @@ class CtrlFlowInstructions(object):
 #        print("finally_", finally_)
 #        print_ast(finally_[0])
 #        print()
-##        print_ast(finally_[1])
-##        print("\n\n")
+# #        print_ast(finally_[1])
+# #        print("\n\n")
 #        
 #        try_except = self.decompile_block(try_except_block).stmnt()
         
@@ -295,7 +334,7 @@ class CtrlFlowInstructions(object):
 
         end, handlers = self.split_handlers(handlers_blocks)
         
-        #raise exception in python 3 (python 2 ilst does not include end so else may go beond)
+        # raise exception in python 3 (python 2 ilst does not include end so else may go beond)
         else_block = self.make_block(end, inclusive=False, raise_=py3)
 
         else_stmnts = self.decompile_block(else_block).stmnt()
@@ -553,7 +592,7 @@ class CtrlFlowInstructions(object):
         'NOP'
 
     def FOR_ITER(self, instr):
-        #set or dict comp
+        # set or dict comp
         self.make_list_comp(instr, instr)
 
     def while_loop(self, instr, loop_block):
@@ -638,7 +677,7 @@ class CtrlFlowInstructions(object):
                 new_block = self.make_block(to=old_max, inclusive=False, raise_=False)
                 and_block.extend(new_block)
 
-        #print("and_block", and_block)
+        # print("and_block", and_block)
         return and_block
 
     def process_logic(self, logic_block):
@@ -654,37 +693,54 @@ class CtrlFlowInstructions(object):
                 else:
                     right = self.process_logic(logic_block[1:])
                 parent = None
-#                assert False
             else:
                 right = self.process_logic(logic_block[1:idx - 1])
                 parent = self.process_logic(logic_block[idx - 1:])
 
-#            if right is None:
             return LogicalOp(flag, right, parent, jump_instr.lineno)
         else:
             idx = find_index(logic_block, lambda instr: instr.opname in JUMPS, default=None)
 
             if idx is None:
+                if len(logic_block) == 3 and [ii.opname for ii in logic_block] == ['JUMP_FORWARD', 'ROT_TWO', 'POP_TOP']:
+                    return None
                 stmnts = self.decompile_block(logic_block).stmnt()
-#                assert len(stmnts) == 1
-                return stmnts[0]
+                if len(stmnts) > 1:
+                    self._ast_stack.extend(stmnts[:-1]) 
+                return stmnts[-1]
+            
             else:
                 right = logic_block[idx:]
                 parent = logic_block[:idx]
 
-                stmnts = self.decompile_block(parent).stmnt()
-                assert len(stmnts) == 1
-                parent = stmnts[0]
+                if len(parent) == 3 and [ii.opname for ii in parent] == ['JUMP_FORWARD', 'ROT_TWO', 'POP_TOP']:
+                    parent = None
+                else:
+                    stmnts = self.decompile_block(parent).stmnt()
+                    
+                    if len(stmnts) == 1:
+                        parent = stmnts[-1]
+                    else:
+                        parent = stmnts[-1]
+                        self._ast_stack.extend(stmnts[:-1]) 
+                        
+                    parent = stmnts[-1]
 
                 right = self.process_logic(right)
-
-                assert right.parent is None
-
+                
+                if parent is not None:
+                    if right.parent is None:
+                        right.parent = parent
+                    else:
+                        right,to_insrt = parse_logic(right)
+                        to_insrt.insert(0, parent)
+                        return right
+                        
                 if right.right is None:
                     return parent
 
-                right.parent = parent
                 return right
+
 
 
     def logic_ast(self, instr, left, hi):
@@ -695,14 +751,6 @@ class CtrlFlowInstructions(object):
         insert_into.insert(0, left)
 
         return ast_
-
-    def JUMP_IF_TRUE_OR_POP(self, instr):
-        left = self.pop_ast_item()
-
-        and_block = self.gather_jumps(instr)
-        hi = self.process_logic([instr] + and_block)
-        ast_ = self.logic_ast(instr, left, hi)
-        self.push_ast_item(ast_)
 
     def make_if(self, instr, left, and_block):
         block = [instr] + and_block[:-1]
@@ -735,7 +783,7 @@ class CtrlFlowInstructions(object):
         
         if jump.is_jump:
             else_block = self.make_block(jump.to, inclusive=False, raise_=False)
-        else: # it is a return
+        else:  # it is a return
             else_block = []
 
         if len(else_block):
@@ -772,38 +820,30 @@ class CtrlFlowInstructions(object):
 
     def POP_JUMP_IF_FALSE(self, instr):
         
-        #print("POP_JUMP_IF_FALSE")
-        
         left = self.pop_ast_item()
 
         and_block = self.gather_jumps(instr)
-        #This is an IF statement
-        
+        # This is an IF statement
         if and_block[-1].opname in ['JUMP_FORWARD', 'JUMP_ABSOLUTE', 'RETURN_VALUE']:
             
-            #this happens if the function was going to return anyway
+            # this happens if the function was going to return anyway
             if and_block[-1].opname == 'RETURN_VALUE':
                 JUMP_FORWARD = Instruction(and_block[-1].i, 110, lineno=0)
                 JUMP_FORWARD.arg = instr.to
                 and_block.append(JUMP_FORWARD)
             
-            #print()
-            #print("make_if", instr, left, and_block)
-            #print()
+            # print()
+            # print("make_if", instr, left, and_block)
+            # print()
             self.make_if(instr, left, and_block)
             return
-        else: #This is an expression
+        else:  # This is an expression
             hi = self.process_logic([instr] + and_block)
             ast_ = self.logic_ast(instr, left, hi)
             self.push_ast_item(ast_)
 
-    def JUMP_IF_FALSE_OR_POP(self, instr):
-        left = self.pop_ast_item()
-
-        and_block = self.gather_jumps(instr)
-        hi = self.process_logic([instr] + and_block)
-        ast_ = self.logic_ast(instr, left, hi)
-        self.push_ast_item(ast_)
+    JUMP_IF_FALSE_OR_POP = JUMP_IF_X_OR_POP(_ast.And)
+    JUMP_IF_TRUE_OR_POP = JUMP_IF_X_OR_POP(_ast.Or)
 
     def JUMP_ABSOLUTE(self, instr):
         continue_ = _ast.Continue(lineno=instr.lineno, col_offset=0)

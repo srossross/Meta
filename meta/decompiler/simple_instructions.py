@@ -422,16 +422,21 @@ class SimpleInstructions(object):
     UNARY_POSITIVE = UNARY_(_ast.UAdd)
 
     def COMPARE_OP(self, instr):
-
+        
         op = instr.arg
 
         right = self.pop_ast_item()
+        
+#        if getattr(right,'id') == 'f':
+#            import pdb;pdb.set_trace()
         expr = self.pop_ast_item()
 
         OP = CMP_OPMAP[op]
         compare = _ast.Compare(left=expr, ops=[OP()], comparators=[right], lineno=instr.lineno, col_offset=0)
 
+        
         self.push_ast_item(compare)
+        
 
 
     def YIELD_VALUE(self, instr):
