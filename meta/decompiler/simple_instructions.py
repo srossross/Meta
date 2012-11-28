@@ -12,6 +12,7 @@ import sys
 from meta.utils import py3, py3op, py2op
 from meta.asttools.visitors.print_visitor import print_ast, dump_ast
 from meta.asttools import cmp_ast
+from meta.decompiler.expression_mutator import ExpressionMutator
 
 if py3:
     class _ast_Print: pass
@@ -323,23 +324,10 @@ class SimpleInstructions(object):
         self.push_ast_item(from_)
 
     def process_ifexpr(self, node):
-
-        if isinstance(node, _ast.If):
-            test = node.test
-            then = node.body
-            else_ = node.orelse
-
-            assert len(then) == 1
-            then = then[0]
-
-            assert len(else_) == 1
-
-            else_ = else_[0]
-
-            if_exp = _ast.IfExp(test, then, else_, lineno=node.lineno, col_offset=0)
-            return if_exp
-        else:
+        if node == 'LOAD_LOCALS': #Special directive
             return node
+        
+        return ExpressionMutator().visit(node)
 
     def POP_TOP(self, instr):
 
