@@ -375,7 +375,6 @@ else:
         source = '(a and b and c)'
         self.assertSame(source)
     
-#    @unittest.expectedFailure
     def test_issue_9(self):
         source = '''def hi():
     if a:    
