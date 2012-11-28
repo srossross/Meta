@@ -374,6 +374,15 @@ else:
     def test_logical(self):
         source = '(a and b and c)'
         self.assertSame(source)
+    
+    @unittest.expectedFailure
+    def test_issue_9(self):
+        source = '''def hi():
+    if a:
+        b
+    elif c:
+        d'''
+        self.assertSame(source)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_expr']
