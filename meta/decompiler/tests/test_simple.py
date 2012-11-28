@@ -370,7 +370,7 @@ class Simple(Base):
         stmnt = '1 if x else 2 if y else 3'
         self.statement(stmnt)
         
-    @unittest.expectedFailure
+#    @unittest.expectedFailure
     def test_issue_7_alt(self):
         stmnt = 'lambda x, y: 1 if x else 2 if y else 3'
         self.statement(stmnt)
