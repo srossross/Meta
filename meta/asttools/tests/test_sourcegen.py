@@ -375,13 +375,15 @@ else:
         source = '(a and b and c)'
         self.assertSame(source)
     
-    @unittest.expectedFailure
+#    @unittest.expectedFailure
     def test_issue_9(self):
         source = '''def hi():
-    if a:
+    if a:    
         b
-    elif c:
-        d'''
+    elif c:    
+        d
+    
+    '''
         self.assertSame(source)
 
 if __name__ == "__main__":
