@@ -10,9 +10,25 @@ from meta.decompiler.control_flow_instructions import CtrlFlowInstructions
 import _ast
 from meta.asttools import print_ast
 from meta.utils import py3, py3op, py2op
+from meta.decompiler.expression_mutator import ExpressionMutator
+from ast import copy_location as cpy_loc
 
 function_ops = ['CALL_FUNCTION', 'CALL_FUNCTION_KW', 'CALL_FUNCTION_VAR', 'CALL_FUNCTION_VAR_KW']
 
+def merge_ifs(stmnts):
+    last = stmnts.pop()
+    
+    while len(stmnts):
+        stmnt = stmnts.pop()
+        if isinstance(stmnt, _ast.If):
+            if stmnt.orelse and not isinstance(stmnt.orelse[0], _ast.If):
+                break
+            stmnt.orelse.append(last)
+            last = stmnt
+    stmnts.append(last)
+    return stmnts 
+        
+    
 def pop_doc(stmnts):
 
     doc = pop_assignment(stmnts, '__doc__')
@@ -93,17 +109,12 @@ def make_function(code, defaults=None, lineno=0):
                               lineno=lineno, col_offset=0
                               )
         if code.co_name == '<lambda>':
-            if len(stmnts) == 2:
-                if isinstance(stmnts[0], _ast.If) and isinstance(stmnts[1], _ast.Return):
-                    assert len(stmnts[0].body) == 1
-                    assert isinstance(stmnts[0].body[0], _ast.Return)
-                    stmnts = [_ast.Return(_ast.IfExp(stmnts[0].test, stmnts[0].body[0].value, stmnts[1].value))]
-                    
-            assert len(stmnts) == 1, stmnts
-            assert isinstance(stmnts[0], _ast.Return)
+            stmnts = merge_ifs(stmnts)
 
-            stmnt = stmnts[0].value
-            ast_obj = _ast.Lambda(args=args, body=stmnt, lineno=lineno, col_offset=0)
+            body = _ast.Return(ExpressionMutator().visit(stmnts[0]))
+            cpy_loc(body, stmnts[0])
+            
+            ast_obj = _ast.Lambda(args=args, body=body, lineno=lineno, col_offset=0)
         else:
 
             if instructions.seen_yield:
@@ -208,16 +219,12 @@ def make_function(code, defaults=None, annotations=(), kw_defaults=(), lineno=0)
         
         
         if code.co_name == '<lambda>':
-            if len(stmnts) == 2:
-                if isinstance(stmnts[0], _ast.If) and isinstance(stmnts[1], _ast.Return):
-                    assert len(stmnts[0].body) == 1
-                    assert isinstance(stmnts[0].body[0], _ast.Return)
-                    stmnts = [_ast.Return(_ast.IfExp(stmnts[0].test, stmnts[0].body[0].value, stmnts[1].value))]
+            stmnts = merge_ifs(stmnts)
 
-            assert isinstance(stmnts[0], _ast.Return)
-
-            stmnt = stmnts[0].value
-            ast_obj = _ast.Lambda(args=args, body=stmnt, lineno=lineno, col_offset=0)
+            body = _ast.Return(ExpressionMutator().visit(stmnts[0]))
+            cpy_loc(body, stmnts[0])
+            
+            ast_obj = _ast.Lambda(args=args, body=body, lineno=lineno, col_offset=0)
         else:
 
             if instructions.seen_yield:
