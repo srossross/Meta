@@ -21,6 +21,9 @@ class ExpressionMutator(NodeTransformer):
         if_exp = _ast.IfExp(test, then, else_, lineno=node.lineno, col_offset=0)
         return if_exp
     
+    def visit_Return(self, node):
+        return NodeTransformer.generic_visit(self, node.value) 
+    
     def visit_FunctionDef(self, node):
         return node
     
