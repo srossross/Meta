@@ -61,12 +61,13 @@ def ast_items(node):
 
 class ASTPrinter(Visitor):
 
-    def __init__(self, indent=' ', level=0, newline='\n'):
+    def __init__(self, indent=' ', level=0, newline='\n', show_labels=True):
         self.out = StringIO()
         self._indent = ''
         self.one_indent = indent
         self.level = level
         self.newline = newline
+        self.show_labels=show_labels
 
     def dump(self, file=sys.stdout):
         self.out.seek(0)
@@ -110,7 +111,10 @@ class ASTPrinter(Visitor):
             while children:
                 attr, child = children.pop(0)
                 if isinstance(child, (list, tuple)):
-                    text = '{attr}=['.format(attr=attr)
+                    if self.show_labels:
+                        text = '{attr}=['.format(attr=attr)
+                    else:
+                        text = '['
                     self.print(text)
                     with self.indent(len(text)):
                         for j, inner_child in enumerate(child):
@@ -123,7 +127,10 @@ class ASTPrinter(Visitor):
 
                     self.print(']')
                 else:
-                    text = '{attr}='.format(attr=attr)
+                    if self.show_labels:
+                        text = '{attr}='.format(attr=attr)
+                    else:
+                        text = ''
 
                     self.print(text)
                     with self.indent(len(text)):
@@ -156,7 +163,7 @@ def dump_ast(ast, indent=' ', newline='\n'):
     visitor.visit(ast)
     return visitor.dumps()
 
-def print_ast(ast, indent=' ', initlevel=0, newline='\n', file=sys.stdout):
+def print_ast(ast, indent=' ', initlevel=0, newline='\n', file=sys.stdout, show_labels=True):
     '''
     Pretty print an ast node.
     
@@ -173,6 +180,6 @@ def print_ast(ast, indent=' ', initlevel=0, newline='\n', file=sys.stdout):
         
     '''
 
-    visitor = ASTPrinter(indent=indent, level=initlevel, newline=newline)
+    visitor = ASTPrinter(indent=indent, level=initlevel, newline=newline, show_labels=show_labels)
     visitor.visit(ast)
     visitor.dump(file=file)
