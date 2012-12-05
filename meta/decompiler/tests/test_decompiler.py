@@ -19,7 +19,7 @@ class LogicJumps(Base):
 
     def test_logic2(self):
         'a or (b or c)'
-        self.statement('a or (b or c)')
+        self.statement('a or (b or c)', 'a or b or c')
 
 
     def test_if_expr_discard(self):
@@ -212,7 +212,7 @@ class ControlFlow(Base):
         self.statement('if a or b: c')
 
     def test_if5(self):
-        self.statement('if not a: c')
+        self.statement('if not a: c', 'if a: pass; else: c')
 
     def test_if6(self):
         self.statement('if not a or b: c')

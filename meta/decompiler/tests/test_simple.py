@@ -241,7 +241,7 @@ class Simple(Base):
         self.statement(stmnt)
 
     def test_subscr_assign(self):
-        stmnt = 'x[y] =z'
+        stmnt = 'x[y] = z'
         self.statement(stmnt)
 
     def test_subscr_del(self):

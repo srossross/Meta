@@ -38,10 +38,10 @@ class Test(Base):
         self.statement('x or a == b > f')
 
     def test_chain1_and2(self):
-        self.statement('x and a == b > f and z', 'x and (((a == b) and (b > f)) and z)')
+        self.statement('x and a == b > f and z', 'x and (a == b > f) and z')
         
     def test_chain1_or2(self):
-        self.statement('x or a == b > f or z', 'x or (((a == b) and (b > f)) or z)')
+        self.statement('x or a == b > f or z', 'x or (a == b > f) or z')
     
     def test_chain2_or(self):
         self.statement('x or a == b > f < e')

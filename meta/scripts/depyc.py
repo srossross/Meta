@@ -22,8 +22,17 @@ import os
 from meta import asttools
 from meta.asttools.visitors.pysourcegen import dump_python_source
 from meta.decompiler.recompile import dump_pyc
+from ast import NodeVisitor, NodeTransformer
 
 py3 = sys.version_info.major >= 3
+    
+def dum_ast(node, fd, compact):
+    if compact:
+        print_ast(node, file=fd)
+    else:
+        json.dump(serialize(node), fd, indent=2)
+        
+        
 
 def depyc(args):
     
@@ -66,7 +75,7 @@ def src_tool(args):
         print_code(code)
         return 
     elif args.output_type == 'ast':
-        json.dump(serialize(mod_ast), args.output, indent=2)
+        dum_ast(mod_ast, args.output, args.compact)
         return 
     elif args.output_type == 'python':
         print(source.decode(), file=args.output)
@@ -87,6 +96,8 @@ def src_tool(args):
         raise  Exception("unknow output type %r" % args.output_type)
 
     return
+
+
 def ast_tool(args):
     print("Reconstructing AST %r" % (args.input.name,), file=sys.stderr)
     
@@ -125,6 +136,10 @@ def setup_parser(parser):
     parser.add_argument('-t', '--input-type', default='from_filename', dest='input_type', choices=['from_filename', 'python', 'pyc', 'ast'])
     
     parser.add_argument('-o', '--output', default='-', type=FileType('wb'))
+
+    parser.add_argument('--compact', action='store_true',
+                       help='print ast in a compact format (this is not reloadable)',
+                        )
     
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--python', default='python', action='store_const', const='python',

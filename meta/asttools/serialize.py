@@ -9,16 +9,19 @@ from ast import NodeVisitor
 import _ast
 import sys
 
-node_name = '0__node_name__'
+node_name = 0
 
 not_py3 = sys.version_info.major < 3
 
 
 class DictAst(NodeVisitor):
+    def __init__(self, attributes=True):
+        self.attributes = attributes
     def generic_visit(self, node):
         dct = {node_name: type(node).__name__}
-        for attr in node._attributes:
-            dct[attr] = getattr(node,attr)
+        if self.attributes:
+            for attr in node._attributes:
+                dct[attr] = getattr(node,attr)
         for field in node._fields:
             value = getattr(node,field)
             if isinstance(value, list):
@@ -29,13 +32,13 @@ class DictAst(NodeVisitor):
                 dct[field] = value
         return dct
 
-def serialize(node):
+def serialize(node, attributes=True):
     '''
     :param node: an _ast.AST object
     
     searialize an ast into a dictionary object
     '''
-    return DictAst().visit(node)
+    return DictAst(attributes=attributes).visit(node)
 
 def deserialize(obj):
     '''

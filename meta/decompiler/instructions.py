@@ -5,13 +5,15 @@ Created on Jul 14, 2011
 '''
 from __future__ import print_function
 
-from meta.decompiler.simple_instructions import SimpleInstructions
-from meta.decompiler.control_flow_instructions import CtrlFlowInstructions
+#from meta.decompiler.simple_instructions import SimpleInstructions
+#from meta.decompiler.control_flow_instructions import CtrlFlowInstructions
 import _ast
 from meta.asttools import print_ast
 from meta.utils import py3, py3op, py2op
 from meta.decompiler.expression_mutator import ExpressionMutator
 from ast import copy_location as cpy_loc
+from meta.decompiler.nextgen import InstructionVisitor
+from meta.decompiler.transformers import mkstmnt, pop_top
 
 function_ops = ['CALL_FUNCTION', 'CALL_FUNCTION_KW', 'CALL_FUNCTION_VAR', 'CALL_FUNCTION_VAR_KW']
 
@@ -61,9 +63,10 @@ def pop_return(stmnts):
 
 
 def make_module(code):
-        from meta.decompiler.disassemble import disassemble
-        instructions = Instructions(disassemble(code))
-        stmnts = instructions.stmnt()
+        stmnts = InstructionVisitor(code).make_ast()
+        stmnts = [pop_top(stmnt) for stmnt in stmnts]
+#        instructions = Instructions(disassemble(code))
+#        stmnts = instructions.stmnt()
 
         doc = pop_doc(stmnts)
         pop_return(stmnts)
@@ -79,11 +82,8 @@ def make_module(code):
 
 @py2op
 def make_function(code, defaults=None, lineno=0):
-        from meta.decompiler.disassemble import disassemble
-
-        instructions = Instructions(disassemble(code))
-
-        stmnts = instructions.stmnt()
+        
+        stmnts = InstructionVisitor(code).make_ast()
 
         if code.co_flags & 2:
             vararg = None
@@ -130,11 +130,8 @@ def make_function(code, defaults=None, lineno=0):
 
 @make_function.py3op
 def make_function(code, defaults=None, annotations=(), kw_defaults=(), lineno=0):
-        from meta.decompiler.disassemble import disassemble
 
-        instructions = Instructions(disassemble(code))
-
-        stmnts = instructions.stmnt()
+        stmnts = InstructionVisitor(code).make_ast()
 
         if code.co_flags & 2:
             vararg = None
@@ -260,7 +257,8 @@ def bitrange(x, start, stop):
     return ((1 << (stop - start)) - 1) & (x >> start)
 
 level = 0
-class Instructions(CtrlFlowInstructions, SimpleInstructions):
+
+class _Instructions_(object):
 
     def __init__(self, ilst, stack_items=None, jump_map=False, outer_scope=None):
         self.ilst_processed = []
@@ -301,7 +299,7 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
         self._ast_stack.append(item)
     
     def decompile_block(self, ilst, stack_items=None, jump_map=False):
-        return Instructions(ilst, stack_items=stack_items, jump_map=jump_map, outer_scope=self)
+        return _Instructions_(ilst, stack_items=stack_items, jump_map=jump_map, outer_scope=self)
 
     def stmnt(self):
 

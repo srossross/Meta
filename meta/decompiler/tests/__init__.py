@@ -1,7 +1,7 @@
 import unittest
 import sys
 import _ast
-from meta.decompiler import make_module
+from meta.decompiler.instructions import make_module
 from meta.asttools import cmp_ast, print_ast
 from meta.testing import py2, py2only
 from meta.asttools.visitors.pysourcegen import dump_python_source
