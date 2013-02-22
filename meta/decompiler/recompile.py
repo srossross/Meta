@@ -33,3 +33,13 @@ def create_pyc(codestring, cfile, timestamp=None):
     marshal.dump(codeobject, cfile)
     cfile.flush()
     
+def dump_pyc(code, fd, timestamp=None):
+
+    if timestamp is None:
+        timestamp = time()
+    
+    fd.write(MAGIC)
+    fd.write(struct.pack('i', timestamp))
+    marshal.dump(code, fd)
+    fd.flush()
+    

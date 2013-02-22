@@ -9,13 +9,16 @@ from meta.asttools import Visitor
 from string import Formatter
 import sys
 from meta.utils import py3op, py2op
+from contextlib import contextmanager
 
 if sys.version_info[0] < 3:
     from StringIO import StringIO
 else:
     from io import StringIO
 
-
+@contextmanager
+def noctx():
+    yield
 class ASTFormatter(Formatter):
 
     def format_field(self, value, format_spec):
@@ -243,10 +246,10 @@ class ExprSourceGen(Visitor):
             self.print(brace[1])
 
     def visitCompare(self, node):
-        self.print('({0:node} ', node.left)
+        self.print('({0:node}', node.left)
         with self.no_indent:
             for (op, right) in zip(node.ops, node.comparators):
-                self.print('{0:node} {1:node}' , op, right)
+                self.print(' {0:node} {1:node}' , op, right)
             self.print(')')
 
     @py2op
@@ -408,10 +411,11 @@ class ExprSourceGen(Visitor):
             values = list(node.values)
             left = values.pop(0)
 
-            self.print('({:node} ', left)
+            self.print('({:node}', left)
             while values:
                 left = values.pop(0)
-                self.print('{0:node} {1:node})', node.op, left)
+                self.print(' {0:node} {1:node}', node.op, left)
+            self.print(')')
 
     def visitIfExp(self, node):
         self.print('{body:node} if {test:node} else {orelse:node}', **node.__dict__)
@@ -532,7 +536,7 @@ class SourceGen(ExprSourceGen):
 
     @py2op
     def visitFunctionDef(self, node):
-        #fields = ('name', 'args', 'body', 'decorator_list')
+        # fields = ('name', 'args', 'body', 'decorator_list')
 
         for decorator in node.decorator_list:
             self.print('@{decorator:node}\n', decorator=decorator)
@@ -574,8 +578,8 @@ class SourceGen(ExprSourceGen):
         self.print('{target:node} {op:node}= {value:node}\n', **node.__dict__)
 
     def visitIf(self, node, indent_first=True):
-
-        self.print('if {:node}:', node.test, level=self.level if indent_first else 0)
+        with noctx() if indent_first else self.no_indent:
+            self.print('if {:node}:', node.test)
 
         with self.indenter:
             if node.body:

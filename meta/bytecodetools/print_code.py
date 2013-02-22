@@ -3,6 +3,8 @@ Created on May 10, 2012
 
 @author: sean
 '''
+from __future__ import print_function
+
 from .bytecode_consumer import ByteCodeConsumer
 from argparse import ArgumentParser
 

@@ -365,6 +365,16 @@ class Simple(Base):
     def test_bug_004(self):
         stmnt = '(a, b, c) = (c, b, a) = (x, y, z)'
         self.statement(stmnt)
+        
+    def test_issue_7(self):
+        stmnt = '1 if x else 2 if y else 3'
+        self.statement(stmnt)
+        
+#    @unittest.expectedFailure
+    def test_issue_7_alt(self):
+        stmnt = 'lambda x, y: 1 if x else 2 if y else 3'
+        self.statement(stmnt)
+        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_assign']
     unittest.main()

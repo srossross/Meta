@@ -10,9 +10,25 @@ from meta.decompiler.control_flow_instructions import CtrlFlowInstructions
 import _ast
 from meta.asttools import print_ast
 from meta.utils import py3, py3op, py2op
+from meta.decompiler.expression_mutator import ExpressionMutator
+from ast import copy_location as cpy_loc
 
 function_ops = ['CALL_FUNCTION', 'CALL_FUNCTION_KW', 'CALL_FUNCTION_VAR', 'CALL_FUNCTION_VAR_KW']
 
+def merge_ifs(stmnts):
+    last = stmnts.pop()
+    
+    while len(stmnts):
+        stmnt = stmnts.pop()
+        if isinstance(stmnt, _ast.If):
+            if stmnt.orelse and not isinstance(stmnt.orelse[0], _ast.If):
+                break
+            stmnt.orelse.append(last)
+            last = stmnt
+    stmnts.append(last)
+    return stmnts 
+        
+    
 def pop_doc(stmnts):
 
     doc = pop_assignment(stmnts, '__doc__')
@@ -93,17 +109,12 @@ def make_function(code, defaults=None, lineno=0):
                               lineno=lineno, col_offset=0
                               )
         if code.co_name == '<lambda>':
-            if len(stmnts) == 2:
-                if isinstance(stmnts[0], _ast.If) and isinstance(stmnts[1], _ast.Return):
-                    assert len(stmnts[0].body) == 1
-                    assert isinstance(stmnts[0].body[0], _ast.Return)
-                    stmnts = [_ast.Return(_ast.IfExp(stmnts[0].test, stmnts[0].body[0].value, stmnts[1].value))]
-                    
-            assert len(stmnts) == 1, stmnts
-            assert isinstance(stmnts[0], _ast.Return)
+            stmnts = merge_ifs(stmnts)
 
-            stmnt = stmnts[0].value
-            ast_obj = _ast.Lambda(args=args, body=stmnt, lineno=lineno, col_offset=0)
+            body = _ast.Return(ExpressionMutator().visit(stmnts[0]))
+            cpy_loc(body, stmnts[0])
+            
+            ast_obj = _ast.Lambda(args=args, body=body, lineno=lineno, col_offset=0)
         else:
 
             if instructions.seen_yield:
@@ -208,16 +219,12 @@ def make_function(code, defaults=None, annotations=(), kw_defaults=(), lineno=0)
         
         
         if code.co_name == '<lambda>':
-            if len(stmnts) == 2:
-                if isinstance(stmnts[0], _ast.If) and isinstance(stmnts[1], _ast.Return):
-                    assert len(stmnts[0].body) == 1
-                    assert isinstance(stmnts[0].body[0], _ast.Return)
-                    stmnts = [_ast.Return(_ast.IfExp(stmnts[0].test, stmnts[0].body[0].value, stmnts[1].value))]
+            stmnts = merge_ifs(stmnts)
 
-            assert isinstance(stmnts[0], _ast.Return)
-
-            stmnt = stmnts[0].value
-            ast_obj = _ast.Lambda(args=args, body=stmnt, lineno=lineno, col_offset=0)
+            body = _ast.Return(ExpressionMutator().visit(stmnts[0]))
+            cpy_loc(body, stmnts[0])
+            
+            ast_obj = _ast.Lambda(args=args, body=body, lineno=lineno, col_offset=0)
         else:
 
             if instructions.seen_yield:
@@ -244,7 +251,7 @@ class StackLogger(list):
 
     def pop(self, *index):
         value = list.pop(self, *index)
-        print('    + ', end='')
+        print('    - ', end='')
         print_ast(value, indent='', newline='')
         print()
         return value
@@ -255,11 +262,12 @@ def bitrange(x, start, stop):
 level = 0
 class Instructions(CtrlFlowInstructions, SimpleInstructions):
 
-    def __init__(self, ilst, stack_items=None, jump_map=False):
+    def __init__(self, ilst, stack_items=None, jump_map=False, outer_scope=None):
         self.ilst_processed = []
         self.ilst = ilst[:]
         self.orig_ilst = ilst
         self.seen_yield = False
+        self.outer_scope = outer_scope
 
         if jump_map:
             self.jump_map = jump_map
@@ -267,14 +275,33 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
             self.jump_map = {}
 
 #        self.ast_stack = StackLogger()
-        self.ast_stack = []
+        self._ast_stack = []
 
         if stack_items:
-            self.ast_stack.extend(stack_items)
+            self._ast_stack.extend(stack_items)
+    
+    def pop_ast_item(self):
+        if self._ast_stack:
+            item = self._ast_stack.pop()
+        else:
+            item = self.outer_scope.pop_ast_item()
 
-    @classmethod
-    def decompile_block(cls, ilst, stack_items=None, jump_map=False):
-        return Instructions(ilst, stack_items=stack_items, jump_map=jump_map)
+#        print(' ' * level, '- ', end='')
+#        print_ast(item, indent='', newline='')
+#        print()
+
+        return item
+    
+    def push_ast_item(self, item):
+        
+#        print(' ' * level, '+ ', end='')
+#        print_ast(item, indent='', newline='')
+#        print()
+
+        self._ast_stack.append(item)
+    
+    def decompile_block(self, ilst, stack_items=None, jump_map=False):
+        return Instructions(ilst, stack_items=stack_items, jump_map=jump_map, outer_scope=self)
 
     def stmnt(self):
 
@@ -282,7 +309,7 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
             instr = self.ilst.pop(0)
             self.visit(instr)
 
-        return self.ast_stack
+        return self._ast_stack
 
     def visit(self, instr):
         global level
@@ -292,11 +319,11 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
         if method is None:
             raise AttributeError('can not handle instruction %r' % (str(instr)))
         
-#        print(' ' * level, "+ visit:", repr(instr))
+#        print(' ' * level, "*%s* visit:" % instr.opname, repr(instr))
 #        level += 1
         method(instr)
 #        level -= 1
-#        print(' ' * level, "- stack:", self.ast_stack)
+#        print(' ' * level, "* stack:", self._ast_stack)
 
 
     def make_block(self, to, inclusive=True, raise_=True):
@@ -324,7 +351,7 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
     @py3op
     def MAKE_FUNCTION(self, instr):
 
-        code = self.ast_stack.pop()
+        code = self.pop_ast_item()
         
         ndefaults = bitrange(instr.oparg, 0, 8)
         nkwonly_defaults = bitrange(instr.oparg, 8, 16)
@@ -332,15 +359,15 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
         
         annotations = []
         for i in range(nannotations):
-            annotations.insert(0, self.ast_stack.pop())
+            annotations.insert(0, self.pop_ast_item())
         
         kw_defaults = []
         for i in range(nkwonly_defaults * 2):
-            kw_defaults.insert(0, self.ast_stack.pop())
+            kw_defaults.insert(0, self.pop_ast_item())
             
         defaults = []
         for i in range(ndefaults):
-            defaults.insert(0, self.ast_stack.pop())
+            defaults.insert(0, self.pop_ast_item())
 
         function = make_function(code, defaults, lineno=instr.lineno, annotations=annotations, kw_defaults=kw_defaults)
         
@@ -350,18 +377,18 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
             function.body.insert(0, _ast.Expr(value=_ast.Str(s=doc, lineno=instr.lineno, col_offset=0),
                                               lineno=instr.lineno, col_offset=0))
             
-        self.ast_stack.append(function)
+        self.push_ast_item(function)
         
     @MAKE_FUNCTION.py2op
     def MAKE_FUNCTION(self, instr):
 
-        code = self.ast_stack.pop()
+        code = self.pop_ast_item()
 
         ndefaults = instr.oparg
 
         defaults = []
         for i in range(ndefaults):
-            defaults.insert(0, self.ast_stack.pop())
+            defaults.insert(0, self.pop_ast_item())
 
         function = make_function(code, defaults, lineno=instr.lineno)
         
@@ -372,10 +399,10 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
                                               lineno=instr.lineno, col_offset=0))
 
         
-        self.ast_stack.append(function)
+        self.push_ast_item(function)
 
     def LOAD_LOCALS(self, instr):
-        self.ast_stack.append('LOAD_LOCALS')
+        self.push_ast_item('LOAD_LOCALS')
     
     @py3op
     def LOAD_BUILD_CLASS(self, instr):
@@ -419,12 +446,12 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
                                lineno=instr.lineno, col_offset=0,
                                )
 
-        self.ast_stack.append(class_)
+        self.push_ast_item(class_)
     
     @py2op
     def BUILD_CLASS(self, instr):
 
-        call_func = self.ast_stack.pop()
+        call_func = self.pop_ast_item()
 
         assert isinstance(call_func, _ast.Call)
 
@@ -440,19 +467,19 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
 
         assert isinstance(ret, _ast.Return) and ret.value == 'LOAD_LOCALS'
 
-        bases = self.ast_stack.pop()
+        bases = self.pop_ast_item()
 
         assert isinstance(bases, _ast.Tuple)
         bases = bases.elts
-        name = self.ast_stack.pop()
+        name = self.pop_ast_item()
 
         class_ = _ast.ClassDef(name=name, bases=bases, body=code, decorator_list=[],
                                lineno=instr.lineno, col_offset=0)
 
-        self.ast_stack.append(class_)
+        self.push_ast_item(class_)
 
     def LOAD_CLOSURE(self, instr):
-        self.ast_stack.append('CLOSURE')
+        self.push_ast_item('CLOSURE')
 
     def MAKE_CLOSURE(self, instr):
         return self.MAKE_FUNCTION(instr)

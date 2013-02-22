@@ -4,6 +4,7 @@ import _ast
 from meta.decompiler import make_module
 from meta.asttools import cmp_ast, print_ast
 from meta.testing import py2, py2only
+from meta.asttools.visitors.pysourcegen import dump_python_source
 
 
 if py2:
@@ -34,20 +35,19 @@ class Base(unittest.TestCase):
             lstream.seek(0)
             rstream.seek(0)
             msg = 'Ast Not Equal:\nGenerated: %r\nExpected:  %r' % (lstream.read(), rstream.read())
+            
             raise self.failureException(msg)
 
 
 
     def statement(self, stmnt, equiv=None, expected_ast=None):
-
         expected_ast = compile(stmnt, filename, 'exec', _ast.PyCF_ONLY_AST) if expected_ast is None else expected_ast
         code = compile(expected_ast, filename, 'exec')
         
+        mod_ast = make_module(code)
         if equiv is None:
-            mod_ast = make_module(code)
+            pass
         else:
-            mod_ast = make_module(code)
-
             expected_ast = compile(equiv, filename, 'exec', _ast.PyCF_ONLY_AST)
 
         self.assertAstEqual(mod_ast, expected_ast)

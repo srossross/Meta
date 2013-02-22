@@ -526,6 +526,17 @@ def example(idx):
         """
         self.statement(example)
         
+    @unittest.expectedFailure
+    def test_issue_8(self):
+        src ='''
+if a:
+    if c:
+        d
+else:
+    e
+'''
+        self.statement(src)
+        
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_assign']
