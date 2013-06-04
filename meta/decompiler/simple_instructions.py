@@ -16,6 +16,7 @@ from meta.decompiler.expression_mutator import ExpressionMutator
 
 if py3:
     class _ast_Print: pass
+    basestring = str
 else:
     _ast_Print = _ast.Print
 
@@ -76,8 +77,8 @@ CMP_OPMAP = {'>=' :_ast.GtE,
 
 def make_const(arg, lineno=0, col_offset=0):
     kw = {'lineno':lineno, 'col_offset':col_offset}
-    
-    if isinstance(arg, str):
+
+    if isinstance(arg, basestring):
         const = _ast.Str(s=arg, **kw)
     elif isinstance(arg, (int, float, complex)):
         const = _ast.Num(n=arg, **kw)
