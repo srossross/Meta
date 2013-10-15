@@ -228,9 +228,12 @@ class CtrlFlowInstructions(object):
             assert except_instrs[0].opname == 'POP_TOP'
             assert except_instrs[1].opname == 'POP_TOP'
             assert except_instrs[2].opname == 'POP_TOP'
-            assert except_instrs[-2].opname in ['JUMP_FORWARD', 'JUMP_ABSOLUTE'], except_instrs[-2]
+            assert except_instrs[-2].opname in ['JUMP_FORWARD', 'JUMP_ABSOLUTE', 'RETURN_VALUE'], except_instrs[-2]
             ends.append(except_instrs[-2].arg)
-            exc_body = self.decompile_block(except_instrs[3:-2]).stmnt()
+            if except_instrs[-2].opname == 'RETURN_VALUE':
+                exc_body = self.decompile_block(except_instrs[3:-1]).stmnt()
+            else:
+                exc_body = self.decompile_block(except_instrs[3:-2]).stmnt()
             if not exc_body:
                 exc_body.append(_ast.Pass(lineno=except_instrs[-2].lineno, col_offset=0))
 
