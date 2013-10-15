@@ -176,6 +176,9 @@ class ExprSourceGen(Visitor):
 
     def visitNum(self, node):
         self.print(repr(node.n))
+        
+    def visitlong(self, node):
+        self.print(repr(node))
 
     def visitBinOp(self, node):
         self.print('({left:node} {op:node} {right:node})', left=node.left, op=node.op, right=node.right)
