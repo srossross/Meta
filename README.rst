@@ -46,3 +46,5 @@ Testing
 ======= 
 
 `python -m unittest discover meta`
+
+test
