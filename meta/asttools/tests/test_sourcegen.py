@@ -386,6 +386,10 @@ else:
     '''
         self.assertSame(source)
 
+    def test_issue_18(self):
+        source = "x = '{y}'"
+        self.assertSame(source)
+
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_expr']
     unittest.main(exit=False)

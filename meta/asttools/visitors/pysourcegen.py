@@ -80,7 +80,9 @@ class ExprSourceGen(Visitor):
         return value
 
     def print(self, line, *args, **kwargs):
-        line = self.formatter.format(line, *args, **kwargs)
+        skip_format = kwargs.get('skip_format', False)
+        if not skip_format:
+            line = self.formatter.format(line, *args, **kwargs)
 
         level = kwargs.get('level')
         prx = self.indent * (level if level else self.level)
@@ -226,7 +228,7 @@ class ExprSourceGen(Visitor):
         self.print("{0}={1:node}", node.arg, node.value)
 
     def visitStr(self, node):
-        self.print(repr(node.s))
+        self.print(repr(node.s), skip_format=True)
 
     def visitMod(self, node):
         self.print('%')
