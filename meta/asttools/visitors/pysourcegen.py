@@ -709,6 +709,32 @@ class SourceGen(ExprSourceGen):
         if node.value is not None:
             self.print('return {:node}\n', node.value)
 
+    def visitTry(self, node):
+        # From Python 3.3, TryExcept and TryFinally are unified as Try
+        self.print('try:')
+
+        with self.indenter:
+            if node.body:
+                for stmnt in node.body:
+                    self.visit(stmnt)
+            else:
+                self.print('pass')
+
+        for hndlr in node.handlers:
+            self.visit(hndlr)
+
+        if node.orelse:
+            self.print('else:')
+            with self.indenter:
+                for stmnt in node.orelse:
+                    self.visit(smnt)
+
+        if node.finalbody:
+            self.print('finally:')
+            with self.indenter:
+                for stmnt in node.finalbody:
+                    self.visit(stmnt)
+
     def visitTryExcept(self, node):
         self.print('try:')
 
