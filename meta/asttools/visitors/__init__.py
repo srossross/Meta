@@ -28,7 +28,7 @@ class Visitor(object):
 
 
     def visit_list(self, nodes, *args, **kwargs):
-        
+
         result = []
         for node in nodes:
             result.append(self.visit(node, *args, **kwargs))
@@ -40,19 +40,19 @@ class Visitor(object):
         attr = 'visit' + node_name
 
         if hasattr(self, attr):
-            mehtod = getattr(self, 'visit' + node_name)
-            return mehtod(node, *args, **kwargs)
+            method = getattr(self, 'visit' + node_name)
+            return method(node, *args, **kwargs)
         elif hasattr(self, 'visitDefault'):
-            mehtod = getattr(self, 'visitDefault')
-            return mehtod(node, *args, **kwargs)
+            method = getattr(self, 'visitDefault')
+            return method(node, *args, **kwargs)
         else:
-            mehtod = getattr(self, 'visit' + node_name)
-            return mehtod(node, *args, **kwargs)
+            method = getattr(self, 'visit' + node_name)
+            return method(node, *args, **kwargs)
 
 
 
 class Mutator(Visitor):
-    
+
     def mutateDefault(self, node):
         for field in node._fields:
             value = getattr(node, field)
@@ -61,30 +61,30 @@ class Mutator(Visitor):
                     if isinstance(item, _ast.AST):
                         new_item = self.mutate(item)
                         if new_item is not None:
-                            value[i] = new_item 
+                            value[i] = new_item
                     else:
                         pass
-                    
+
             elif  isinstance(value, _ast.AST):
                 new_value = self.mutate(value)
                 if new_value is not None:
                     setattr(node, field, new_value)
 
         return None
-    
+
     def mutate(self, node, *args, **kwargs):
-        
+
         node_name = type(node).__name__
 
         attr = 'mutate' + node_name
 
         if hasattr(self, attr):
-            mehtod = getattr(self, 'mutate' + node_name)
-            return mehtod(node, *args, **kwargs)
+            method = getattr(self, 'mutate' + node_name)
+            return method(node, *args, **kwargs)
         elif hasattr(self, 'mutateDefault'):
-            mehtod = getattr(self, 'mutateDefault')
-            return mehtod(node, *args, **kwargs)
+            method = getattr(self, 'mutateDefault')
+            return method(node, *args, **kwargs)
         else:
-            mehtod = getattr(self, 'mutate' + node_name)
-            return mehtod(node, *args, **kwargs)
+            method = getattr(self, 'mutate' + node_name)
+            return method(node, *args, **kwargs)
 
