@@ -244,6 +244,11 @@ class SimpleInstructions(object):
                 if not isinstance(value.targets, _ast.Tuple):
                     value.targets = [_ast.Tuple(value.targets, _ast.Store())]
                     value.value = _ast.Tuple([value.value], _ast.Store())
+                    value.targets[0].lineno = value.targets[0].elts[0].lineno
+                    value.targets[0].col_offset = value.targets[0].elts[0].col_offset
+                    value.value.lineno = value.value.elts[0].lineno
+                    value.value.col_offset = value.value.elts[0].col_offset
+
                 value.targets[0].elts.append(assname)
                 value.value.elts.append(_)
 
