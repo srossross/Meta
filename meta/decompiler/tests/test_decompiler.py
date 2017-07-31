@@ -537,6 +537,21 @@ else:
 '''
         self.statement(src)
         
+    def test_issue_027(self):
+        stmnt1 = '''
+def foo():
+    a, b = b, a
+    return None
+'''
+        self.statement(stmnt1)
+
+        stmnt2 = '''
+def foo():
+    a, b = 1, z
+    return None
+'''
+        self.statement(stmnt2)
+
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_assign']

@@ -248,7 +248,6 @@ class SimpleInstructions(object):
                     value.targets[0].col_offset = value.targets[0].elts[0].col_offset
                     value.value.lineno = value.value.elts[0].lineno
                     value.value.col_offset = value.value.elts[0].col_offset
-
                 value.targets[0].elts.append(assname)
                 value.value.elts.append(_)
 
