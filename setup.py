@@ -9,7 +9,7 @@ except IOError as err:
     long_description = str(err)
 
 try:
-    version_str = open('version.txt').read()
+    version_str = open('version.txt').read().strip()
 except IOError as err:
     version_str = '???'
 
