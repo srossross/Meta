@@ -76,12 +76,15 @@ class ASTPrinter(Visitor):
         self.out.seek(0)
         return self.out.read()
 
-    def print(self, text, noindent=False, **kwargs):
+    def print(self, text, noindent=False, skip_format=False, **kwargs):
 #        if noindent:
 #            prf = ''
 #        else:
 #            prf = self._indent
-        new_text = text.format(**kwargs)
+        if skip_format:
+            new_text = text
+        else:
+            new_text = text.format(**kwargs)
 #        print(prf, new_text, file=self.out, sep='', end='')
         print(new_text, file=self.out, sep='', end='')
 
@@ -94,7 +97,7 @@ class ASTPrinter(Visitor):
     def visitDefault(self, node):
         nodename = '%s(' % clsname(node)
 
-        self.print(nodename, noindent=True)
+        self.print(nodename, noindent=True, skip_format=True)
 
         undefined = [attr for attr in node._fields if not hasattr(node, attr)]
         if undefined:
@@ -111,26 +114,26 @@ class ASTPrinter(Visitor):
                 attr, child = children.pop(0)
                 if isinstance(child, (list, tuple)):
                     text = '{attr}=['.format(attr=attr)
-                    self.print(text)
+                    self.print(text, skip_format=True)
                     with self.indent(len(text)):
                         for j, inner_child in enumerate(child):
                             if isinstance(inner_child, _ast.AST):
                                 self.visit(inner_child)
                             else:
-                                self.print(repr(inner_child))
+                                self.print(repr(inner_child), skip_format=True)
                             if j < (len(child) - 1):
                                 self.print(", {nl}{idnt}", nl=self.newline, idnt=self._indent)
 
-                    self.print(']')
+                    self.print(']', skip_format=True)
                 else:
                     text = '{attr}='.format(attr=attr)
 
-                    self.print(text)
+                    self.print(text, skip_format=True)
                     with self.indent(len(text)):
                         if isinstance(child, _ast.AST):
                             self.visit(child)
                         else:
-                            self.print(repr(child))
+                            self.print(repr(child), skip_format=True)
 
                 if children:
                     self.print(", {nl}{idnt}", nl=self.newline, idnt=self._indent)
@@ -139,7 +142,7 @@ class ASTPrinter(Visitor):
 
                 i += 1
 
-        self.print(")")
+        self.print(")", skip_format=True)
 
 def dump_ast(ast, indent=' ', newline='\n'):
     '''
