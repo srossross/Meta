@@ -8,3 +8,4 @@ dist
 _build
 .settings/
 __pycache__
+venv3
