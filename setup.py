@@ -1,5 +1,6 @@
 # Copyright (c) 2008-2011 by Enthought, Inc.
 # All rights reserved.
+import os
 
 from setuptools import setup, find_packages
 
@@ -8,10 +9,11 @@ try:
 except IOError as err:
     long_description = str(err)
 
+version_path = os.path.abspath('version.txt')
 try:
-    version_str = open('version.txt').read()
+    version_str = open(version_path).read()
 except IOError as err:
-    version_str = '???'
+    raise IOError("File indicating the version could not be read: {}".format(version_path)) from err
 
 
 setup(
@@ -22,7 +24,7 @@ setup(
     maintainer='Sean Ross-Ross',
     maintainer_email='enthought-dev@enthought.com',
     url='http://srossross.github.com/Meta',
-    
+
     classifiers=[c.strip() for c in """\
         Development Status :: 5 - Production/Stable
         Intended Audience :: Developers
@@ -48,5 +50,4 @@ setup(
                                         'depyc = meta.scripts.depyc:main',
                                         ],
                     }
-
 )
