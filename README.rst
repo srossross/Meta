@@ -54,3 +54,15 @@ Testing
 
     test
 
+
+Versioning
+==========
+From the version 1.0.0, Meta follows `Semantic Versioning <http://semver.org/spec/v1.0.0.html>`_.
+The version X.Y.Z indicates:
+
+* X is the major version (backward-incompatible),
+* Y is the minor version (backward-compatible), and
+* Z is the patch version (backward-compatible bug fix).
+
+Prior to version 1.0.0, custom versioning scheme was used.
+
