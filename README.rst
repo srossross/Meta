@@ -1,8 +1,6 @@
 Meta
 ====
 
-.. image:: https://secure.travis-ci.org/srossross/Meta.png?branch=develop
-
 A Pure Python module containing a framework to manipulate and analyze
 python abstract syntax trees and bytecode.
 
@@ -28,7 +26,7 @@ This shows how to take python source to a code object and back again from within
 
     assert source == source2
 
-This shows the depyc script. The script compiles itself, and then the compiled script extracts itself::
+This shows the depyc script. The script compiles itself, and then the compiled script extracts itself:
 
 .. code-block:: bash
 
@@ -37,19 +35,22 @@ This shows the depyc script. The script compiles itself, and then the compiled s
     python -m depycX depycX.pyc --python > depycX.py
     echo depycX.py
 
+
 Notes
 ======
 
- * Meta is python3 compliant (mostly)
+* Meta is python3 compliant (mostly)
 
 Bugs
 =====
- * The decompliler does not yet support complex list/set/dict - comprehensions
+
+* The decompliler does not yet support complex list/set/dict - comprehensions
 
 Testing
 =======
 
 .. code-block:: bash
+
     python -m unittest discover meta
 
     test
