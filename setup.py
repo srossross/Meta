@@ -10,9 +10,9 @@ with open('README.rst') as fid:
 version_path = os.path.abspath('version.txt')
 try:
     with open(version_path) as fid:
-    version_str = fid.read().strip()
+        version_str = fid.read().strip()
 except IOError as err:
-    raise IOError("File indicating the version could not be read: {}".format(version_path)) from err
+    raise IOError("File indicating the version could not be read: {}".format(version_path))
 
 
 setup(
