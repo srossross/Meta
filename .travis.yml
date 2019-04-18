@@ -23,7 +23,7 @@ install:
 
 # command to run tests
 script: 
-  - py.test --cov=py_linq
+  - py.test --cov=meta
 
 after_success:
   - coveralls
