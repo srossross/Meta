@@ -16,7 +16,6 @@ matrix:
 
 # command to install dependencies
 install: 
-  - "pip install . --use-mirrors"
   - pip install -qq pytest
   - pip install -qq "pytest-cov<2.6"
   - pip install -qq python-coveralls
