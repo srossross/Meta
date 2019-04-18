@@ -2,9 +2,23 @@ language: python
 python:
   - "2.7"
   - "3.2"
+  - "3.3"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "3.7"
+
 # command to install dependencies
 install: 
-    - "pip install . --use-mirrors"
+  - "pip install . --use-mirrors"
+  - pip install -qq pytest
+  - pip install -qq "pytest-cov<2.6"
+  - pip install -qq python-coveralls
+  - pip install --upgrade pip
 
 # command to run tests
-script: python -m unittest discover
+script: 
+  - py.test --cov=py_linq
+
+after_success:
+  - coveralls
