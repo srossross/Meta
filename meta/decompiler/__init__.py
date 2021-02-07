@@ -50,7 +50,10 @@ def compile_func(ast_node, filename, globals, **defaults):
     '''
 
     funcion_name = ast_node.name
-    module = _ast.Module(body=[ast_node])
+    if sys.version_info >= (3, 8):
+        module = _ast.Module(body=[ast_node], type_ignores=[])
+    else:
+        module = _ast.Module([ast_node])
 
     ctx = {'%s_default' % key : arg for key, arg in defaults.items()}
 
