@@ -10,3 +10,8 @@ _build
 __pycache__
 venv3
 .idea
+.vscode/settings.json
+.pytest_cache/
+.coverage
+Pipfile
+Pipfile.lock
