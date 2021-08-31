@@ -6,13 +6,21 @@ Created on Jul 14, 2011
 from __future__ import print_function
 import opcode
 import _ast
+import sys
 from meta.bytecodetools.instruction import Instruction
 from meta.asttools.visitors.print_visitor import print_ast
 from meta.utils import py3op, py2op, py3
-AND_JUMPS = ['JUMP_IF_FALSE_OR_POP', 'POP_JUMP_IF_FALSE']
-OR_JUMPS = ['JUMP_IF_TRUE_OR_POP', 'POP_JUMP_IF_TRUE']
-JUMPS = AND_JUMPS + OR_JUMPS
-JUMP_OPS = [opcode.opmap[name] for name in JUMPS]
+
+if sys.version_info >= (2, 7):
+    AND_JUMPS = ['JUMP_IF_FALSE_OR_POP', 'POP_JUMP_IF_FALSE']
+    OR_JUMPS = ['JUMP_IF_TRUE_OR_POP', 'POP_JUMP_IF_TRUE']
+    JUMPS = AND_JUMPS + OR_JUMPS
+    JUMP_OPS = [opcode.opmap[name] for name in JUMPS]
+else:
+    AND_JUMPS = []
+    OR_JUMPS = []
+    JUMPS = []
+    JUMP_OPS = []
 
 
 def split(block, name):
@@ -602,7 +610,9 @@ class CtrlFlowInstructions(object):
 
         kw = dict(lineno=instr.lineno, col_offset=0)
 
-        loop_block_map = {instr.i:instr.op for instr in loop_block}
+        loop_block_map = {}
+        for instr in loop_block:
+            loop_block_map[instr.i] = instr.op
 
         first_i = loop_block[0].i
         
@@ -662,7 +672,7 @@ class CtrlFlowInstructions(object):
 
         and_block = self.make_block(to=to, inclusive=False, raise_=False)
 
-        jump_tos = {to}
+        jump_tos = set([to])
         last_len = 0
         old_max = to
         

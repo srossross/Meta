@@ -55,7 +55,9 @@ def compile_func(ast_node, filename, globals, **defaults):
     else:
         module = _ast.Module(body=[ast_node])
 
-    ctx = {'%s_default' % key : arg for key, arg in defaults.items()}
+    ctx = {}
+    for key, arg in defaults.iteritems():
+        ctx['%s_default' % key] = arg
 
     code = compile(module, filename, 'exec')
 

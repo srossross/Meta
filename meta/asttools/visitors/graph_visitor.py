@@ -57,7 +57,7 @@ class CollectNodes(Visitor):
             if not self.graph.has_edge(node.id, ctx_var):
                 self.graph.add_edge(node.id, ctx_var)
 
-        return {node.id}
+        return set([node.id])
 
     def visitalias(self, node):
         name = node.asname if node.asname else node.name
@@ -68,7 +68,7 @@ class CollectNodes(Visitor):
         if not self.graph.has_node(name):
             self.graph.add_node(name)
 
-        return {name}
+        return set([name])
 
     def visitCall(self, node):
         left = self.visit(node.func)

@@ -11,7 +11,7 @@ import sys
 from meta.utils import py3op, py2op
 from contextlib import contextmanager
 
-if sys.version_info.major < 3:
+if sys.version_info[0] < 3:
     from StringIO import StringIO
 else:
     from io import StringIO

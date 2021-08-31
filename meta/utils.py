@@ -5,7 +5,7 @@ Created on Nov 4, 2011
 '''
 import sys
 
-py3 = sys.version_info.major >= 3
+py3 = sys.version_info[0] >= 3
 
 class Python2(object):
     @staticmethod

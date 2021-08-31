@@ -10,7 +10,7 @@ import sys
 import _ast
 from warnings import warn
 
-if sys.version_info.major < 3:
+if sys.version_info[0] < 3:
     from StringIO import StringIO
 else:
     from io import StringIO
