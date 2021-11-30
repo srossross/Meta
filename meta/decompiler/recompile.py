@@ -17,7 +17,6 @@ else:
      
 import marshal
 import imp
-from py_compile import PyCompileError, wr_long
 
 MAGIC = imp.get_magic()
 

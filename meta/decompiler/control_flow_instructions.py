@@ -376,7 +376,8 @@ class CtrlFlowInstructions(object):
         else:
             else_ = []
 
-        try_except = _ast.TryExcept(body=body, handlers=handlers, orelse=else_, lineno=instr.lineno, col_offset=0)
+        try_except = _ast.Try(body=body, handlers=handlers, orelse=else_,
+                              finalbody=[], lineno=instr.lineno, col_offset=0)
 
         self.push_ast_item(try_except)
     

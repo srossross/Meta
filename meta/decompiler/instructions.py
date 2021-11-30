@@ -351,6 +351,7 @@ class Instructions(CtrlFlowInstructions, SimpleInstructions):
     @py3op
     def MAKE_FUNCTION(self, instr):
 
+        name = self.pop_ast_item()
         code = self.pop_ast_item()
         
         ndefaults = bitrange(instr.oparg, 0, 8)
