@@ -22,7 +22,7 @@ setup(
     author_email='srossross@enthought.com',
     maintainer='Sean Ross-Ross',
     maintainer_email='enthought-dev@enthought.com',
-    url='http://srossross.github.com/Meta',
+    url='http://srossross.github.io/Meta',
 
     classifiers=[
         "Development Status :: 5 - Production/Stable",
