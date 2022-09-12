@@ -1,8 +1,8 @@
-'''
+"""
 Created on Aug 3, 2011
 
 @author: sean
-'''
+"""
 from __future__ import print_function
 import _ast
 import ast
@@ -13,11 +13,12 @@ from meta.asttools.mutators.replace_mutator import replace_nodes
 from meta.asttools.visitors.symbol_visitor import get_symbols
 from meta.asttools.visitors.cond_symbol_visitor import conditional_lhs
 
-class Assignment(object):
 
+class Assignment(object):
     def __init__(self, root, assignments):
         self.root = root
         self.assignments = assignments
+
 
 def visit_conditional(self, node):
 
@@ -27,10 +28,12 @@ def visit_conditional(self, node):
         return
 
     bgather = GatherAssignments()
-    for stmnt in node.body: bgather.visit(stmnt)
+    for stmnt in node.body:
+        bgather.visit(stmnt)
 
     egather = GatherAssignments()
-    for stmnt in node.orelse: egather.visit(stmnt)
+    for stmnt in node.orelse:
+        egather.visit(stmnt)
 
     for symbol in stable:
         node_list = self.assign_id_map.setdefault(symbol, [])
@@ -43,10 +46,11 @@ def visit_conditional(self, node):
 
         node_list.append(Assignment(root=node, assignments=assignments))
 
+
 class GatherAssignments(Visitor):
-    '''
+    """
     Collect ast nodes that assign to the same variable.
-    '''
+    """
 
     def __init__(self):
         self.assign_id_map = {}
@@ -68,23 +72,24 @@ class GatherAssignments(Visitor):
             node_list = self.assign_id_map.setdefault(id, [])
             node_list.append(Assignment(root=node, assignments=(node,)))
 
+
 def remove_trivial(root):
-    '''
+    """
     Remove redundant statements.
-    
+
     The statement `a = 1` will be removed::
-        
+
         a = 1
         a = 2
 
     The statement `a = 1` will not be removed because `b` depends on it::
-        
+
         a = 1
         b = a + 2
         a = 2
-        
+
     :param root: ast node
-    '''
+    """
 
     gen = GatherAssignments()
     gen.visit(root)
@@ -99,7 +104,7 @@ def remove_trivial(root):
             i1 = root.body.index(assignments[j].root)
             i2 = root.body.index(assignments[j + 1].root)
 
-            body = root.body[i1 + 1:i2]
+            body = root.body[i1 + 1 : i2]
             grapher = GraphGen()
             for stmnt in body:
                 grapher.visit(stmnt)
@@ -112,23 +117,24 @@ def remove_trivial(root):
     for old in to_remove:
         replace_nodes(root, old, Pass(old))
 
+
 def remove_unused_assign(root, symbol):
-    '''
+    """
     Remove redundant statements.
-    
+
     The statement `a = 1` will be removed::
-        
+
         a = 1
         a = 2
 
     The statement `a = 1` will not be removed because `b` depends on it::
-        
+
         a = 1
         b = a + 2
         a = 2
-        
+
     :param root: ast node
-    '''
+    """
 
     gen = GatherAssignments()
     gen.visit(root)
@@ -138,17 +144,16 @@ def remove_unused_assign(root, symbol):
     if symbol not in gen.assign_id_map:
         return
 
-
     assignments = gen.assign_id_map[symbol]
 
     if len(assignments) < 2:
-        return 
+        return
 
     for j in range(len(assignments) - 1):
         i1 = root.body.index(assignments[j].root)
         i2 = root.body.index(assignments[j + 1].root)
 
-        body = root.body[i1 + 1:i2]
+        body = root.body[i1 + 1 : i2]
         grapher = GraphGen()
         for stmnt in body:
             grapher.visit(stmnt)
@@ -160,4 +165,3 @@ def remove_unused_assign(root, symbol):
 
     for old in to_remove:
         replace_nodes(root, old, Pass(old))
-

@@ -1,19 +1,9 @@
-"""
-Created on Jul 19, 2011
-
-@author: sean
-"""
-from __future__ import print_function
-
-from meta.asttools import Visitor
+from .visitor import Visitor
 import sys
 import _ast
 from warnings import warn
 
-if sys.version_info.major < 3:
-    from StringIO import StringIO
-else:
-    from io import StringIO
+from io import StringIO
 
 
 class Indentor(object):

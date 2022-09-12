@@ -1,10 +1,11 @@
-'''
+"""
 Created on Aug 3, 2011
 
 @author: sean
-'''
+"""
 from meta.asttools.visitors import Visitor
 import ast
+
 
 class SymbolVisitor(Visitor):
     def __init__(self, ctx_types=(ast.Load, ast.Store)):
@@ -37,8 +38,8 @@ class SymbolVisitor(Visitor):
 
         name = node.asname if node.asname else node.name
 
-        if '.' in name:
-            name = name.split('.', 1)[0]
+        if "." in name:
+            name = name.split(".", 1)[0]
 
         if ast.Store in self.ctx_types:
             return {name}
@@ -46,17 +47,16 @@ class SymbolVisitor(Visitor):
             return set()
 
 
-
 def get_symbols(node, ctx_types=(ast.Load, ast.Store)):
-    '''
-    Returns all symbols defined in an ast node. 
-    
+    """
+    Returns all symbols defined in an ast node.
+
     if ctx_types is given, then restrict the symbols to ones with that context.
-    
+
     :param node: ast node
-    :param ctx_types: type or tuple of types that may be found assigned to the `ctx` attribute of 
+    :param ctx_types: type or tuple of types that may be found assigned to the `ctx` attribute of
                       an ast Name node.
-        
-    '''
+
+    """
     gen = SymbolVisitor(ctx_types)
     return gen.visit(node)

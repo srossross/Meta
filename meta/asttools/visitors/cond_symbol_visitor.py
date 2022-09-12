@@ -1,8 +1,8 @@
-'''
+"""
 Created on Aug 4, 2011
 
 @author: sean
-'''
+"""
 from __future__ import print_function
 
 from meta.asttools.visitors import Visitor, visit_children
@@ -10,8 +10,8 @@ from meta.asttools.visitors.symbol_visitor import get_symbols
 import ast
 from meta.utils import py2op
 
-class ConditionalSymbolVisitor(Visitor):
 
+class ConditionalSymbolVisitor(Visitor):
     def __init__(self):
         self._cond_lhs = set()
         self._stable_lhs = set()
@@ -25,7 +25,6 @@ class ConditionalSymbolVisitor(Visitor):
 
     visitModule = visit_children
     visitPass = visit_children
-
 
     def update_stable_rhs(self, symbols):
         new_symbols = symbols - self._stable_rhs
@@ -57,7 +56,9 @@ class ConditionalSymbolVisitor(Visitor):
 
     def _update_undefined(self, symbols):
         self.undefined.update(symbols - self._stable_lhs)
+
     update_undefined = _update_undefined
+
     @property
     def stable_lhs(self):
         assert not (self._stable_lhs & self._cond_lhs)
@@ -117,7 +118,6 @@ class ConditionalSymbolVisitor(Visitor):
 
     def visitContinue(self, node):
         self.seen_break = True
-
 
     def visit_loop(self, node):
 
@@ -211,7 +211,7 @@ class ConditionalSymbolVisitor(Visitor):
 
         self.update_cond_lhs(outputs.symmetric_difference(orelse_outputs))
         self.update_cond_rhs(inputs.symmetric_difference(orelse_inputs))
-    
+
     @py2op
     def visitExec(self, node):
 
@@ -229,7 +229,7 @@ class ConditionalSymbolVisitor(Visitor):
 
         if node.msg:
             self.update_stable_rhs(get_symbols(node.msg, ast.Load))
-            
+
     @py2op
     def visitRaise(self, node):
 
@@ -347,20 +347,22 @@ class ConditionalSymbolVisitor(Visitor):
 
     def visitReturn(self, node):
         self.update_stable_rhs(get_symbols(node.value, ast.Load))
-        
+
+
 def csv(node):
     gen = ConditionalSymbolVisitor()
     gen.visit(node)
     return gen
 
+
 def lhs(node):
-    '''
+    """
     Return a set of symbols in `node` that are assigned.
-    
-    :param node: ast node 
-    
+
+    :param node: ast node
+
     :returns: set of strings.
-    '''
+    """
 
     gen = ConditionalSymbolVisitor()
     if isinstance(node, (list, tuple)):
@@ -369,14 +371,15 @@ def lhs(node):
         gen.visit(node)
     return gen.lhs
 
+
 def rhs(node):
-    '''
+    """
     Return a set of symbols in `node` that are used.
-    
-    :param node: ast node 
-    
+
+    :param node: ast node
+
     :returns: set of strings.
-    '''
+    """
 
     gen = ConditionalSymbolVisitor()
     if isinstance(node, (list, tuple)):
@@ -385,14 +388,15 @@ def rhs(node):
         gen.visit(node)
     return gen.rhs
 
+
 def conditional_lhs(node):
-    '''
+    """
     Group outputs into contitional and stable
-    :param node: ast node 
-    
+    :param node: ast node
+
     :returns: tuple of (contitional, stable)
-    
-    '''
+
+    """
 
     gen = ConditionalSymbolVisitor()
     gen.visit(node)
@@ -400,13 +404,13 @@ def conditional_lhs(node):
 
 
 def conditional_symbols(node):
-    '''
+    """
     Group lhs and rhs into contitional, stable and undefined
-    :param node: ast node 
-    
+    :param node: ast node
+
     :returns: tuple of (contitional_lhs, stable_lhs),(contitional_rhs, stable_rhs), undefined
-    
-    '''
+
+    """
 
     gen = ConditionalSymbolVisitor()
     gen.visit(node)
@@ -415,9 +419,10 @@ def conditional_symbols(node):
     undefined = gen.undefined
     return lhs, rhs, undefined
 
-if __name__ == '__main__':
 
-    source = '''
+if __name__ == "__main__":
+
+    source = """
 while k:
     a = 1
     b = 1
@@ -427,8 +432,6 @@ else:
     a =2
     c= 3
     d = 1
-    '''
+    """
 
     print(conditional_lhs(ast.parse(source)))
-
-

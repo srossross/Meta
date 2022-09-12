@@ -1,50 +1,54 @@
-'''
+"""
 Created on Jul 18, 2011
 
 @author: sean
-'''
+"""
 import _ast
 from meta.asttools import Visitor, visit_children
 
+
 def removeable(self, node):
-    '''
+    """
     node is removable only if all of its children are as well.
-    '''
+    """
     throw_away = []
     for child in self.children(node):
         throw_away.append(self.visit(child))
 
-    if self.mode == 'exclusive':
+    if self.mode == "exclusive":
         return all(throw_away)
-    elif self.mode == 'inclusive':
+    elif self.mode == "inclusive":
         return any(throw_away)
     else:
         raise TypeError("mode must be one of 'exclusive' or 'inclusive'")
 
-# Helper function to create a pass node with a line numer and col_offset 
+
+# Helper function to create a pass node with a line numer and col_offset
 Pass = lambda node: _ast.Pass(lineno=node.lineno, col_offset=node.col_offset)
 
+
 class PruneVisitor(Visitor):
-    '''
+    """
     Visitor to remove ast nodes
-    
+
     :param symbols: set of symbol that are removable.
-    
-    '''
-    def __init__(self, symbols, mode='exclusive'):
+
+    """
+
+    def __init__(self, symbols, mode="exclusive"):
         self.remove_symbols = symbols
-        
-        if mode not in ['exclusive', 'inclusive']:
+
+        if mode not in ["exclusive", "inclusive"]:
             raise TypeError("mode must be one of 'exclusive' or 'inclusive'")
-        
+
         self.mode = mode
 
     visitDefault = removeable
-    
+
     def reduce(self, body):
-        '''
+        """
         remove nodes from a list
-        '''
+        """
         i = 0
         while i < len(body):
             stmnt = body[i]
@@ -76,7 +80,6 @@ class PruneVisitor(Visitor):
         len_body = len(node.body)
         if len_body == 0:
             node.body.append(_ast.Pass(lineno=node.lineno, col_offset=node.col_offset))
-
 
         self.reduce(node.orelse)
 
@@ -167,7 +170,15 @@ class PruneVisitor(Visitor):
                 hndlr.body.append(Pass(hndlr))
 
         if len_body == 0:
-            node.handlers = [_ast.ExceptHandler(type=None, name=None, body=[Pass(node)], lineno=node.lineno, col_offset=node.col_offset)]
+            node.handlers = [
+                _ast.ExceptHandler(
+                    type=None,
+                    name=None,
+                    body=[Pass(node)],
+                    lineno=node.lineno,
+                    col_offset=node.col_offset,
+                )
+            ]
 
         return len_body == 0 and len(node.orelse) == 0
 
@@ -176,4 +187,3 @@ class PruneVisitor(Visitor):
 
     def visitRaise(self, node):
         return False
-

@@ -1,8 +1,8 @@
-'''
+"""
 Module to augment and analize python ast nodes.
 
 This module uses the python `ast` moduel exclusivly not the depricated `compiler.ast`.  
-'''
+"""
 
 import _ast
 import ast
@@ -10,12 +10,14 @@ import ast
 from meta.asttools.visitors import dont_visit, visit_children, Visitor
 
 
-class Undedined: pass
+class Undedined:
+    pass
+
 
 def cmp_ast(node1, node2):
-    '''
+    """
     Compare if two nodes are equal.
-    '''
+    """
 
     if type(node1) != type(node2):
         return False
@@ -41,15 +43,16 @@ def cmp_ast(node1, node2):
     return True
 
 
-
-
-#===============================================================================
-# 
-#===============================================================================
+# ===============================================================================
+#
+# ===============================================================================
 
 from meta.asttools.visitors.print_visitor import print_ast, dump_ast as str_ast
 from meta.asttools.visitors.pysourcegen import python_source, dump_python_source
 from meta.asttools.visitors.cond_symbol_visitor import lhs, rhs
-from meta.asttools.visitors.cond_symbol_visitor import conditional_lhs, conditional_symbols
+from meta.asttools.visitors.cond_symbol_visitor import (
+    conditional_lhs,
+    conditional_symbols,
+)
 from meta.asttools.visitors.symbol_visitor import get_symbols
 from meta.asttools.visitors.graph_visitor import make_graph

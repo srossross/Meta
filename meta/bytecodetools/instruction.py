@@ -1,22 +1,23 @@
-'''
+"""
 Created on May 10, 2012
 
 @author: sean
-'''
+"""
 from __future__ import print_function
 
 import opcode
 import sys
 
 py3 = sys.version_info.major >= 3
-co_ord = (lambda c:c) if py3 else ord
+co_ord = (lambda c: c) if py3 else ord
 
 
 class Instruction(object):
-    '''
-    A Python byte-code instruction. 
-    '''
-    def __init__(self, i= -1, op=None, lineno=None):
+    """
+    A Python byte-code instruction.
+    """
+
+    def __init__(self, i=-1, op=None, lineno=None):
         self.i = i
         self.op = op
         self.lineno = lineno
@@ -28,11 +29,11 @@ class Instruction(object):
     @property
     def opname(self):
         return opcode.opname[self.op]
-    
+
     @property
     def is_jump(self):
         return self.op in opcode.hasjrel or self.op in opcode.hasjabs
-    
+
     @property
     def to(self):
         if self.op in opcode.hasjrel:
@@ -43,13 +44,16 @@ class Instruction(object):
             raise Exception("this is not a jump op (%s)" % (self.opname,))
 
     def __repr__(self):
-        res = '<%s(%i)' % (opcode.opname[self.op], self.i,)
+        res = "<%s(%i)" % (
+            opcode.opname[self.op],
+            self.i,
+        )
 
         if self.arg is not None:
-            res += ' arg=%r' % (self.arg,)
+            res += " arg=%r" % (self.arg,)
         elif self.oparg is not None:
-            res += ' oparg=%r' % (self.oparg,)
-        return res + '>'
+            res += " oparg=%r" % (self.oparg,)
+        return res + ">"
 
     def __str__(self):
         result = []
@@ -60,14 +64,14 @@ class Instruction(object):
             result.append("   ")
 
         if self.lasti:
-            result.append('-->')
+            result.append("-->")
         else:
-            result.append('   ')
+            result.append("   ")
 
         if self.label:
-            result.append('>>')
+            result.append(">>")
         else:
-            result.append('  ')
+            result.append("  ")
 
         result.append(repr(self.i).rjust(4))
 
@@ -77,17 +81,15 @@ class Instruction(object):
 
             result.append(repr(self.oparg).rjust(5))
             if self.op in opcode.hasconst:
-                result.append('(' + repr(self.arg) + ')')
+                result.append("(" + repr(self.arg) + ")")
             elif self.op in opcode.hasname:
-                result.append('(' + repr(self.arg) + ')')
+                result.append("(" + repr(self.arg) + ")")
             elif self.op in opcode.hasjrel:
-                result.append('(to ' + repr(self.arg) + ')')
+                result.append("(to " + repr(self.arg) + ")")
             elif self.op in opcode.haslocal:
-                result.append('(' + repr(self.arg) + ')')
+                result.append("(" + repr(self.arg) + ")")
             elif self.op in opcode.hascompare:
-                result.append('(' + repr(self.arg) + ')')
+                result.append("(" + repr(self.arg) + ")")
             elif self.op in opcode.hasfree:
-                result.append('(' + repr(self.arg) + ')')
-        return ' '.join(result)
-
-        
+                result.append("(" + repr(self.arg) + ")")
+        return " ".join(result)

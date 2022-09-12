@@ -1,16 +1,17 @@
-'''
+"""
 Created on Aug 3, 2011
 
 @author: sean
-'''
+"""
 
 import _ast
 from meta.asttools.visitors import Visitor
 
+
 class Replacer(Visitor):
-    '''
-    Visitor to replace nodes. 
-    '''
+    """
+    Visitor to replace nodes.
+    """
 
     def __init__(self, old, new):
         self.old = old
@@ -38,25 +39,28 @@ class Replacer(Visitor):
 
         return
 
+
 def replace_nodes(root, old, new):
 
-    '''
-    Replace the old node with the new one. 
+    """
+    Replace the old node with the new one.
     Old must be an indirect child of root
-     
-    :param root: ast node that contains an indirect refrence to old 
+
+    :param root: ast node that contains an indirect refrence to old
     :param old: node to replace
-    :param new: node to replace `old` with 
-    '''
+    :param new: node to replace `old` with
+    """
 
     rep = Replacer(old, new)
     rep.visit(root)
     return
 
+
 class NodeRemover(Visitor):
-    '''
+    """
     Remove a node.
-    '''
+    """
+
     def __init__(self, to_remove):
         self.to_remove
 
@@ -81,4 +85,3 @@ class NodeRemover(Visitor):
                 pass
 
         return
-

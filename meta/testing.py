@@ -1,8 +1,8 @@
-'''
+"""
 Created on Nov 5, 2011
 
 @author: sean
-'''
+"""
 
 import sys
 import unittest
