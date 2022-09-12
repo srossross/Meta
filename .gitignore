@@ -10,3 +10,4 @@ _build
 __pycache__
 venv3
 .idea
+venv10-arm/
