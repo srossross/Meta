@@ -116,13 +116,14 @@ class ExprSourceGen(Visitor):
 
         if pos:
             farg_list.extend(pos)
-            farg_list.append('/')
-
+            farg_list.append("/")
 
         # Position or kw arguments foo(a,b=1)
         args = node.args
         defaults = [None] * (len(args) - len(node.defaults)) + node.defaults
-        pos_or_kw = [self._format_pos_or_kw(arg, default) for arg,default in zip(args, defaults)]
+        pos_or_kw = [
+            self._format_pos_or_kw(arg, default) for arg, default in zip(args, defaults)
+        ]
 
         farg_list.extend(pos_or_kw)
 
@@ -135,7 +136,9 @@ class ExprSourceGen(Visitor):
         # Kw only args foo(*, b, c=1)
         args = node.kwonlyargs
         defaults = [None] * (len(args) - len(node.kw_defaults)) + node.kw_defaults
-        kw = [self._format_pos_or_kw(arg, default) for arg,default in zip(args, defaults)]
+        kw = [
+            self._format_pos_or_kw(arg, default) for arg, default in zip(args, defaults)
+        ]
 
         farg_list.extend(kw)
 
@@ -537,7 +540,10 @@ class SourceGen(ExprSourceGen):
 
     def visitAnnAssign(self, node):
         self.print(
-            "{target:node}: {annotation:node} = {value:node}\n", target=node.target, annotation=node.annotation, value=node.value
+            "{target:node}: {annotation:node} = {value:node}\n",
+            target=node.target,
+            annotation=node.annotation,
+            value=node.value,
         )
 
     def visitAugAssign(self, node):

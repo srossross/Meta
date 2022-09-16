@@ -1,10 +1,12 @@
 from .visitor import ByteCodeVisitor
 
+
 def consume(n: int):
     def visit_X(self, op):
         for i in range(n):
             self.visit_last()
         return None
+
     return visit_X
 
 
@@ -45,4 +47,3 @@ class NoOp(ByteCodeVisitor):
             self.visit_last()
         self.visit_last()  # method
         return None
-

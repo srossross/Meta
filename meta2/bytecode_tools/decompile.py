@@ -40,11 +40,23 @@ def decompile_function(any):
     k_only = [p for p in sig.parameters.values() if p.kind is PK.KEYWORD_ONLY]
     args = ast.arguments(
         args=[ast.arg(arg=p.name, annotation=None, type_comment=None) for p in p_or_k],
-        defaults=[ast.Constant(value=p.default, kind=None) for p in p_or_k if p.default is not inspect._empty],
+        defaults=[
+            ast.Constant(value=p.default, kind=None)
+            for p in p_or_k
+            if p.default is not inspect._empty
+        ],
         kwarg=ast.arg(arg=kw.name, annotation=None, type_comment=None) if kw else None,
-        kwonlyargs=[ast.arg(arg=p.name, annotation=None, type_comment=None) for p in k_only],
-        kw_defaults=[ast.Constant(value=p.default, kind=None) for p in k_only if p.default is not inspect._empty],
-        vararg=ast.arg(arg=pos.name, annotation=None, type_comment=None) if pos else None,
+        kwonlyargs=[
+            ast.arg(arg=p.name, annotation=None, type_comment=None) for p in k_only
+        ],
+        kw_defaults=[
+            ast.Constant(value=p.default, kind=None)
+            for p in k_only
+            if p.default is not inspect._empty
+        ],
+        vararg=ast.arg(arg=pos.name, annotation=None, type_comment=None)
+        if pos
+        else None,
         posonlyargs=[],
     )
     return ast.FunctionDef(
@@ -57,7 +69,7 @@ def decompile_function(any):
     )
 
 
-def decompile_function_recursive(any, ignore_modules=('numpy', 'torch', 'jax')):
+def decompile_function_recursive(any, ignore_modules=("numpy", "torch", "jax")):
     body = _decompile_function_recursive(any, ignore_modules)
     mod = ast.Module(body=body, type_ignores=[])
     return mod
