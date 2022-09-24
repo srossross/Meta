@@ -11,6 +11,10 @@ COMPILER_FLAGS = {v: k for k, v in COMPILER_FLAG_NAMES.items()}
 
 
 class FunctionTransformer(ByteCodeVisitor, metaclass=ABCMeta):
+    """
+    NOT USED
+    """
+
     def __init__(self, func) -> None:
         super().__init__(func)
         self.globals = func.__globals__

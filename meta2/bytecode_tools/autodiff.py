@@ -1,12 +1,10 @@
 from .visitor import ByteCodeVisitor
+from .ir import IR
 
 
-class ForwardPass(ByteCodeVisitor):
-    def __init__(self, func) -> None:
-        super().__init__(func)
-        self.vars = {}
-        self.graph = {}
-        self.stack = []
+class ForwardPass:
+    def __init__(self, ir) -> None:
+        pass
 
     def push(self, v):
         self.stack.append(v)
@@ -22,3 +20,21 @@ class ForwardPass(ByteCodeVisitor):
         s = self.pop()
         v = getattr(s, op.argval)
         self.push(v)
+
+
+def main():
+    import numpy as np
+    import dis
+
+    def func_forward(x):
+        i0 = -x
+        val = np.exp(i0)
+        return val, (i0,)
+
+    dis.dis(func_forward)
+    ir = IR.from_function(func_forward)
+    print(ir)
+
+
+if __name__ == "__main__":
+    main()

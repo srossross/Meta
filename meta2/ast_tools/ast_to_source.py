@@ -165,6 +165,9 @@ class ExprSourceGen(Visitor):
     def visitAdd(self, node):
         self.print("+")
 
+    def visitMatMult(self, node):
+        self.print("@")
+
     def visitalias(self, node):
         if node.asname is None:
             self.print("{0}", node.name)
@@ -249,7 +252,10 @@ class ExprSourceGen(Visitor):
 
             for key, value in items:
                 pc()
-                self.print("{0:node}:{1:node}", key, value)
+                if key is None:
+                    self.print("**{0:node}", value)
+                else:
+                    self.print("{0:node}:{1:node}", key, value)
                 i += 1
 
             self.print("}}")

@@ -1,8 +1,14 @@
 import ast
+import types
 import inspect
 from inspect import _ParameterKind as PK
-from .functions_called import functions_called
-from .decompile_simple_ops import BytecodeToAST
+from .decompile_simple_ops import DecompileSimpleOps
+from .decompile_expr_ops import DecompileExprOps
+from .decompile_jump_ops import DecompileJumpOps
+
+
+class BytecodeToAST(DecompileSimpleOps, DecompileExprOps, DecompileJumpOps):
+    pass
 
 
 def wrap_body(func):
@@ -24,6 +30,18 @@ def wrap_body(func):
         returns=None,
         type_comment=None,
     )
+
+
+def decompile(code: types.CodeType, mode="function") -> ast.AST:
+    body = BytecodeToAST.from_code(code).visit_reverse()
+
+    if mode == "exec":
+        # remove return statement
+        print(body)
+        assert isinstance(body[-1], ast.Return), body
+        return ast.Module(body=body[:-1], type_ignores=[])
+
+    assert False, f"mode={mode}"
 
 
 def decompile_function(any):

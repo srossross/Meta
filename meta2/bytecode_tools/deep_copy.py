@@ -1,5 +1,6 @@
-from .function_transformer import FunctionTransformer
+from .not_used.function_transformer import FunctionTransformer
 from .functions_called import functions_called
+from .ir import IR
 
 
 class DeepCopy(FunctionTransformer):
@@ -13,35 +14,37 @@ class DeepCopy(FunctionTransformer):
 
 def main():
     import dis
-
     import numpy as np
 
     def one():
         return 1.0
 
     def func(x):
-        # return abs(-1)
         y = np.exp(-x)
-        return (one() - y) / abs(one() + y)
+        return (1.0 - y) / abs(1.0 + y)
+        # return one()
 
     dis.dis(func)
-    for item in dir(func.__code__):
-        if item.startswith("co_"):
-            # print('NEW: ', item, getattr(new_func.__code__, item))
-            print("OLD: ", item, getattr(func.__code__, item))
+    # print("---")
+    # dis.dis(func2)
+    # for item in dir(func.__code__):
+    #     if item.startswith("co_"):
+    #         # print('NEW: ', item, getattr(new_func.__code__, item))
+    #         print("OLD: ", item, getattr(func.__code__, item))
 
-    tf = DeepCopy(func)
-    new_func = tf.transform()
+    ir = IR.from_function(func)
+
+    new_func = ir.function()
 
     print("new_func", new_func)
     print(func(1))
     dis.dis(new_func)
 
     print(new_func.__globals__)
-    for item in dir(new_func.__code__):
-        if item.startswith("co_"):
-            print("NEW: ", item, getattr(new_func.__code__, item))
-            print("OLD: ", item, getattr(func.__code__, item))
+    # for item in dir(new_func.__code__):
+    #     if item.startswith("co_"):
+    #         print("NEW: ", item, getattr(new_func.__code__, item))
+    #         print("OLD: ", item, getattr(func.__code__, item))
 
     print(new_func(1))
 

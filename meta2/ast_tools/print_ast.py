@@ -102,7 +102,9 @@ class ASTPrinter(Visitor):
                 ),
                 stacklevel=2,
             )
-        undefined = [attr for attr in node._attributes if not hasattr(node, attr)]
+        undefined = [
+            attr for attr in getattr(node, "_attributes", ()) if not hasattr(node, attr)
+        ]
         if undefined:
             warn(
                 "ast does %r not have required attribute(s) %r "
