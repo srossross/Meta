@@ -2,10 +2,10 @@ import dis
 import ast
 import opcode
 from re import A
-from ..ast_tools.print_ast import print_ast
-from ..ast_tools.ast_to_source import ast_to_source
+from ...ast_tools.print_ast import print_ast
+from ...ast_tools.ast_to_source import ast_to_source
 from .decompile_simple_ops import DecompileSimpleOps
-from .unwind import split
+from ..unwind import split
 
 hascond = {opcode.opmap["POP_JUMP_IF_TRUE"], opcode.opmap["POP_JUMP_IF_FALSE"]}
 anyjump = set(opcode.hasjabs) | set(opcode.hasjrel)
@@ -113,11 +113,13 @@ class WhileLoopDecompiler:
         return len(self.conditions) + len(self.body)
 
     def decompile(self):
-        test = DecompileSimpleOps(self.conditions).visit_last()
+        test0 = DecompileSimpleOps(self.conditions).visit_last()
 
-        body, test0 = split(self.body, unwind=1)
+        body, test1 = split(self.body, unwind=1)
+
+        test = DecompileSimpleOps(test0).visit_last()
         body = BlockDecompiler(body).consume_blocks()
-        return [ast.While(body=body, orelse=[], test=ast.Add())]
+        return [ast.While(body=body, orelse=[], test=test)]
 
 
 class BlockDecompiler:
@@ -173,14 +175,13 @@ def test():
         #     return c
         # return d
 
-        while a:
+        while a or b:
             start
             # if d:
             #     break
             end
-        A
-        bre
-        after
+        after1
+        after2
         return f
 
         # f

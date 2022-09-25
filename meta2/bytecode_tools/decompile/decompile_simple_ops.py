@@ -1,5 +1,5 @@
 import ast
-from .visitor import ByteCodeVisitor
+from ..visitor import ByteCodeVisitor
 
 
 def binary_op(ast_op: ast.AST):
