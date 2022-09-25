@@ -1,9 +1,7 @@
 import ast
 import dis
-import _ast
+from meta2.ast_tools.print_ast import print_ast
 from .decompile import decompile
-from meta2.conftest import ast_deep_equal
-from ..ast_tools.print_ast import print_ast
 
 
 def test_decompile(corpus):

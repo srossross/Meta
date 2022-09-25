@@ -1,6 +1,6 @@
 import ast
 from collections import namedtuple
-from .visitor import ByteCodeVisitor
+from ..visitor import ByteCodeVisitor
 from meta2.ast_tools.print_ast import print_ast
 
 
